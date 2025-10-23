@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "src/Primitive.h"
 #include "src/Shader.h"
 #include "src/ShaderProgram.h"
 
@@ -53,43 +54,25 @@ int main() {
     const auto program = ShaderProgram{&vertex, &frag};
     program.Link();
 
-    float vertices[] = {
-        0.5f,  0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-       -0.5f, -0.5f, 0.0f,
-       -0.5f,  0.5f, 0.0f
+    float vertices1[] = {
+        0.0f,  0.0f, 0.0f,
+        0.5f, 0.5f, 0.0f,
+        1.0f, 0.0f, 0.0f,
    };
 
-    unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3
+    uint32_t indices1[] = {
+        0, 1, 2,
     };
 
-    // Vertex array object
-    unsigned int VAO;
-    glGenVertexArrays(1, &VAO);
+    const auto triangle1 = Primitive{vertices1, sizeof(vertices1), indices1, sizeof(indices1)};
 
-    // Vertex buffer object
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
+    float vertices2[] = {
+        0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -1.0f, 0.0f, 0.0f,
+   };
 
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices,GL_STATIC_DRAW);
-
-    // Element buffer object
-    unsigned int EBO;
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // vertex attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void *>(nullptr));
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
+    const auto triangle2 = Primitive{vertices2, sizeof(vertices2), indices1, sizeof(indices1)};
 
     // render loop
     while(!glfwWindowShouldClose(window))
@@ -100,8 +83,8 @@ int main() {
 
         // use draw triangle
         program.Use();
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        triangle1.Draw();
+        triangle2.Draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
