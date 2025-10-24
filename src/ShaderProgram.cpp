@@ -36,4 +36,10 @@ void ShaderProgram::Use() const
     glUseProgram(program);
 }
 
+void ShaderProgram::SetUniform(const std::string& name, const glm::vec4 value) const
+{
+    const int location = glGetUniformLocation(program, name.c_str());
+    glUniform4f(location, value.x, value.y, value.z, value.w);
+}
+
 

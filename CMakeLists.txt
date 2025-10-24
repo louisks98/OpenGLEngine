@@ -25,7 +25,11 @@ add_executable(OpenGLEngine main.cpp glad.c
         src/ShaderProgram.h
         src/Primitive.cpp
         src/Primitive.h
+        include/stb_image.cpp
+        src/Texture.cpp
+        src/Texture.h
 )
 target_include_directories(OpenGLEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(OpenGLEngine PRIVATE glfw OpenGL::GL X11 pthread dl)
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/shader" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/image" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

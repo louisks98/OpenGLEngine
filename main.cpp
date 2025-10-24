@@ -1,11 +1,14 @@
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "stb_image.h"
 #include "src/Primitive.h"
 #include "src/Shader.h"
 #include "src/ShaderProgram.h"
+#include "src/Texture.h"
 
 using namespace std;
 
@@ -47,7 +50,6 @@ int main() {
 
     auto vertex = Shader{"vertex", VERTEX ,"./shader/vertex.vert"};
     auto frag = Shader{"fragment", FRAGMENT, "./shader/fragment.frag"};
-
     vertex.Compile();
     frag.Compile();
 
@@ -55,9 +57,9 @@ int main() {
     program.Link();
 
     float vertices1[] = {
-        0.0f,  0.0f, 0.0f,
-        0.5f, 0.5f, 0.0f,
-        1.0f, 0.0f, 0.0f,
+        -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+        0.0f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
    };
 
     uint32_t indices1[] = {
@@ -65,14 +67,7 @@ int main() {
     };
 
     const auto triangle1 = Primitive{vertices1, sizeof(vertices1), indices1, sizeof(indices1)};
-
-    float vertices2[] = {
-        0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        -1.0f, 0.0f, 0.0f,
-   };
-
-    const auto triangle2 = Primitive{vertices2, sizeof(vertices2), indices1, sizeof(indices1)};
+    const auto texture = Texture{"image/container.jpg"};
 
     // render loop
     while(!glfwWindowShouldClose(window))
@@ -83,8 +78,8 @@ int main() {
 
         // use draw triangle
         program.Use();
+        texture.Bind();
         triangle1.Draw();
-        triangle2.Draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

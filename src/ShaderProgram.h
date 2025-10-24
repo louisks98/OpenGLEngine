@@ -5,6 +5,7 @@
 #ifndef OPENGLENGINE_SHADERPROGRAM_H
 #define OPENGLENGINE_SHADERPROGRAM_H
 #include "Shader.h"
+#include <glm/vec4.hpp>
 
 
 class ShaderProgram
@@ -14,6 +15,7 @@ public:
 
     void Link() const;
     void Use() const;
+    void SetUniform(const std::string& name, glm::vec4 value) const;
 private:
     unsigned int program;
     Shader* vertex;
