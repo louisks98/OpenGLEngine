@@ -23,11 +23,19 @@ add_executable(OpenGLEngine main.cpp glad.c
         src/HelperFunctions.h
         src/ShaderProgram.cpp
         src/ShaderProgram.h
-        src/Primitive.cpp
-        src/Primitive.h
+        src/Mesh.cpp
+        src/Mesh.h
         include/stb_image.cpp
         src/Texture.cpp
         src/Texture.h
+        src/Renderer.cpp
+        src/Renderer.h
+        src/PrimitiveFactory.cpp
+        src/PrimitiveFactory.h
+        src/Model.cpp
+        src/Model.h
+        src/Transform.cpp
+        src/Transform.h
 )
 target_include_directories(OpenGLEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(OpenGLEngine PRIVATE glfw OpenGL::GL X11 pthread dl)

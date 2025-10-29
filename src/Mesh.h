@@ -9,27 +9,19 @@
 
 #include "glm/glm.hpp"
 
-struct Vertex
-{
-    glm::vec3 position;
-    glm::vec4 color;
-};
-
-
-class Primitive
-{
+class Mesh {
 public:
-    Primitive(float vertices[], uint32_t vSize,  uint32_t indices[], uint32_t iSize);
+    Mesh(float vertices[], uint32_t vSize,  uint32_t indices[], uint32_t iSize);
+    Mesh(const Mesh& mesh);
 
-    void Draw() const;
+    [[nodiscard]]
+    uint32_t GetId() const;
+    std::vector<float>* GetVertices();
+    std::vector<uint32_t>* GetIndices();
 private:
-    unsigned int VAO;
-    unsigned int VBO;
-    unsigned int EBO;
-
+    uint32_t Id = rand();
     std::vector<float> vertices;
     std::vector<unsigned int> indices;
 };
-
 
 #endif //OPENGLENGINE_PRIMITIVE_H

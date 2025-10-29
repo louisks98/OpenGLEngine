@@ -4,8 +4,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "stb_image.h"
-#include "src/Primitive.h"
+#include "src/Mesh.h"
+#include "src/PrimitiveFactory.h"
+#include "src/Renderer.h"
 #include "src/Shader.h"
 #include "src/ShaderProgram.h"
 #include "src/Texture.h"
@@ -52,7 +53,6 @@ int main() {
     auto frag = Shader{"fragment", FRAGMENT, "./shader/fragment.frag"};
     vertex.Compile();
     frag.Compile();
-
     const auto program = ShaderProgram{&vertex, &frag};
     program.Link();
 
@@ -61,30 +61,43 @@ int main() {
         0.0f, 0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
         0.5f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
    };
-
     uint32_t indices1[] = {
         0, 1, 2,
     };
 
-    const auto triangle1 = Primitive{vertices1, sizeof(vertices1), indices1, sizeof(indices1)};
+    const auto triangle1 = Mesh{vertices1, 24, indices1, 3};
     const auto texture = Texture{"image/container.jpg"};
+    auto triangle = Model{triangle1};
+    triangle.SetTexture(texture);
+
+    auto cube = PrimitiveFactory::CreateCube();
+    cube.SetTexture(texture);
+    Transform transform = cube.GetTransform();
+    transform.SetPosition(glm::vec3(-1.0f, 2.0f, -10.0f));
+
+    auto cube2 = PrimitiveFactory::CreateCube();
+    cube2.SetTexture(texture);
+    transform = cube2.GetTransform();
+    transform.SetPosition(glm::vec3(4.0f, -3.0f, 0.0f));
+
+    auto cube3 = PrimitiveFactory::CreateCube();
+    cube3.SetTexture(texture);
+    transform = cube3.GetTransform();
+    transform.SetPosition(glm::vec3(7.0f, 9.0f, -4.0f));
+
+    auto meshes = std::vector{cube, cube2, cube3};
+    auto Shaders = std::vector{program};
+    auto renderer = Renderer(meshes, program);
 
     // render loop
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // use draw triangle
-        program.Use();
-        texture.Bind();
-        triangle1.Draw();
+        renderer.Draw();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
 
     glfwTerminate();
     return 0;

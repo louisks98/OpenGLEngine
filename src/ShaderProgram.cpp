@@ -4,6 +4,7 @@
 
 #include "ShaderProgram.h"
 #include <iostream>
+#include <glm/gtc/type_ptr.hpp>
 
 ShaderProgram::ShaderProgram(Shader* vert, Shader* frag)
 {
@@ -36,10 +37,10 @@ void ShaderProgram::Use() const
     glUseProgram(program);
 }
 
-void ShaderProgram::SetUniform(const std::string& name, const glm::vec4 value) const
+void ShaderProgram::SetUniform(const std::string& name, const glm::mat4 &value) const
 {
     const int location = glGetUniformLocation(program, name.c_str());
-    glUniform4f(location, value.x, value.y, value.z, value.w);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 
