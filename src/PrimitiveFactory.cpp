@@ -53,7 +53,7 @@ Model PrimitiveFactory::CreateCube()
         20, 21, 22,     20, 22, 23    // left
     };
 
-    const auto mesh = Mesh(vertices, sizeof(vertices), indices, sizeof(indices));
+    const auto mesh = Mesh(vertices, 120, indices, 36);
     auto model = Model(mesh);
 
     return model;

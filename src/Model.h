@@ -19,7 +19,7 @@ public:
     [[nodiscard]]
     Mesh& GetMesh() { return mesh;}
     [[nodiscard]]
-    const Transform& GetTransform() const { return transform;}
+    Transform& GetTransform() { return transform;}
     [[nodiscard]]
     Texture& GetTexture() { return texture;}
 

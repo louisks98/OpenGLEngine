@@ -72,18 +72,15 @@ int main() {
 
     auto cube = PrimitiveFactory::CreateCube();
     cube.SetTexture(texture);
-    Transform transform = cube.GetTransform();
-    transform.SetPosition(glm::vec3(-1.0f, 2.0f, -10.0f));
+    cube.GetTransform().SetPosition(glm::vec3(-1.0f, 2.0f, -10.0f));
 
     auto cube2 = PrimitiveFactory::CreateCube();
     cube2.SetTexture(texture);
-    transform = cube2.GetTransform();
-    transform.SetPosition(glm::vec3(4.0f, -3.0f, 0.0f));
+    cube2.GetTransform().SetPosition(glm::vec3(1.5f, 2.0f, -2.0f));
 
     auto cube3 = PrimitiveFactory::CreateCube();
     cube3.SetTexture(texture);
-    transform = cube3.GetTransform();
-    transform.SetPosition(glm::vec3(7.0f, 9.0f, -4.0f));
+    cube3.GetTransform().SetPosition(glm::vec3(1.0f, -2.0f, -4.0f));
 
     auto meshes = std::vector{cube, cube2, cube3};
     auto Shaders = std::vector{program};
