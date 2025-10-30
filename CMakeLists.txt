@@ -25,6 +25,9 @@ add_executable(OpenGLEngine main.cpp glad.c
         src/Model.h
         src/Transform.cpp
         src/Transform.h
+        src/Camera.cpp
+        src/Camera.h
+        src/Transformable.h
 )
 target_include_directories(OpenGLEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(OpenGLEngine PRIVATE glfw OpenGL::GL)

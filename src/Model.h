@@ -4,14 +4,13 @@
 
 #ifndef OPENGLENGINE_MODEL_H
 #define OPENGLENGINE_MODEL_H
-#include <utility>
 
 #include "Mesh.h"
 #include "Texture.h"
-#include "Transform.h"
+#include "Transformable.h"
 
 
-class Model
+class Model : public Transformable
 {
 public:
     explicit Model(const Mesh &mesh);
@@ -19,14 +18,11 @@ public:
     [[nodiscard]]
     Mesh& GetMesh() { return mesh;}
     [[nodiscard]]
-    Transform& GetTransform() { return transform;}
-    [[nodiscard]]
     Texture& GetTexture() { return texture;}
 
     void SetTexture(Texture texture);
 
 private:
-    Transform transform;
     Mesh mesh;
     Texture texture;
 };

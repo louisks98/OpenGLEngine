@@ -3,6 +3,8 @@
 //
 
 #include "Renderer.h"
+
+#include <ranges>
 #include <utility>
 #include <GLFW/glfw3.h>
 
@@ -11,18 +13,21 @@
 
 Renderer::Renderer(std::vector<Model> meshes, const ShaderProgram &shader)
 {
-    RenderObjects = std::map<Model *, RenderObject>();
-    Models = std::move(meshes);
-    Program = shader;
+    renderObjects = std::map<Model *, RenderObject>();
+    models = std::move(meshes);
+    program = shader;
+    camera = Camera();
+    view = glm::mat4(1.0f);
+    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
     Initialize();
 }
 
 void Renderer::Initialize()
 {
     glEnable(GL_DEPTH_TEST);
-    RenderObjects.clear();
+    renderObjects.clear();
 
-    for (auto &model : Models)
+    for (auto &model : models)
     {
         Mesh& mesh = model.GetMesh();
         const auto vertices = mesh.GetVertices();
@@ -63,33 +68,44 @@ void Renderer::Initialize()
         renderObject.VBO = VBO;
         renderObject.EBO = EBO;
 
-        RenderObjects[&model] = renderObject;
+        renderObjects[&model] = renderObject;
     }
 }
+
+void Renderer::Update(const float time)
+{
+    constexpr float radius = 10.0f;
+    const float camX = sin(time) * radius;
+    const float camZ = cos(time) * radius;
+    camera.SetPosition(glm::vec3(camX, 0.0f, camZ));
+    view = camera.GetViewMatrix();
+
+    for (auto [model, renderObject] : renderObjects)
+    {
+        Mesh& mesh = model->GetMesh();
+        Transform& transform = model->GetTransform();
+        transform.SetRotation(glm::vec3(0.0f, time * 50.0f, 0.0f));
+    }
+}
+
 
 void Renderer::Draw() const
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-    const glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-
-
-    for (auto [model, renderObject] : RenderObjects)
+    for (auto [model, renderObject] : renderObjects)
     {
         Mesh& mesh = model->GetMesh();
         Transform& transform = model->GetTransform();
-        transform.SetRotation(glm::vec3(0.0f, static_cast<float>(glfwGetTime()) * 50.0f, 0.0f));
         auto matrix = transform.GetMatrix();
         auto texture = model->GetTexture();
         texture.Bind();
 
-        Program.Use();
-        Program.SetUniform("projection", projection);
-        Program.SetUniform("view", view);
-        Program.SetUniform("model", matrix);
+        program.Use();
+        program.SetUniform("projection", projection);
+        program.SetUniform("view", view);
+        program.SetUniform("model", matrix);
 
         glBindVertexArray(renderObject.VAO);
         glDrawElements(GL_TRIANGLES, mesh.GetIndices()->size(), GL_UNSIGNED_INT, nullptr);

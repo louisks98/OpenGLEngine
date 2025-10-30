@@ -72,7 +72,7 @@ int main() {
 
     auto cube = PrimitiveFactory::CreateCube();
     cube.SetTexture(texture);
-    cube.GetTransform().SetPosition(glm::vec3(-1.0f, 2.0f, -10.0f));
+    cube.GetTransform().SetPosition(glm::vec3(0, 0, 0));
 
     auto cube2 = PrimitiveFactory::CreateCube();
     cube2.SetTexture(texture);
@@ -90,6 +90,7 @@ int main() {
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
+        renderer.Update(static_cast<float>(glfwGetTime()));
         renderer.Draw();
 
         glfwSwapBuffers(window);

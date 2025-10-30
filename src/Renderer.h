@@ -5,6 +5,8 @@
 #ifndef OPENGLENGINE_RENDERER_H
 #define OPENGLENGINE_RENDERER_H
 #include <map>
+
+#include "Camera.h"
 #include "Model.h"
 #include "ShaderProgram.h"
 
@@ -20,12 +22,17 @@ class Renderer
 public:
     Renderer(std::vector<Model> meshes, const ShaderProgram &shader);
     void Initialize();
+    void Update(float time);
     void Draw() const;
 
 private:
-    std::map<Model*, RenderObject> RenderObjects;
-    std::vector<Model> Models;
-    ShaderProgram Program;
+    std::map<Model*, RenderObject> renderObjects;
+    std::vector<Model> models;
+    ShaderProgram program;
+    Camera camera;
+
+    glm::mat4 projection;
+    glm::mat4 view;
 };
 
 
