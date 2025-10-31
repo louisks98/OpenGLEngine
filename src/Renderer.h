@@ -24,12 +24,14 @@ public:
     void Initialize();
     void Update(float time);
     void Draw() const;
+    Camera& GetCamera() {return camera;};
 
 private:
+    Camera camera;
+
     std::map<Model*, RenderObject> renderObjects;
     std::vector<Model> models;
     ShaderProgram program;
-    Camera camera;
 
     glm::mat4 projection;
     glm::mat4 view;

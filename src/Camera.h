@@ -16,6 +16,12 @@ public:
     void SetPosition(glm::vec3 pos);
     void SetTarget(glm::vec3 pos);
     void LookAt(glm::vec3 pos, glm::vec3 target);
+    glm::vec3 GetForward() const { return forward; };
+    void SetForward(glm::vec3 forward);
+    glm::vec3 GetRight() const { return  right; };
+    glm::vec3 GetUp() const { return  up; };
+
+    void LockToTarget(const bool value) { lockToTarget = value; };
 
 private:
     glm::vec3 target;
@@ -25,6 +31,8 @@ private:
 
     glm::mat4 mutable viewMatrix;
     bool mutable  viewMatrixDirty = true;
+
+    bool lockToTarget = false;
 
     void CalculateCameraAxes();
 };

@@ -74,12 +74,7 @@ void Renderer::Initialize()
 
 void Renderer::Update(const float time)
 {
-    constexpr float radius = 10.0f;
-    const float camX = sin(time) * radius;
-    const float camZ = cos(time) * radius;
-    camera.SetPosition(glm::vec3(camX, 0.0f, camZ));
     view = camera.GetViewMatrix();
-
     for (auto [model, renderObject] : renderObjects)
     {
         Mesh& mesh = model->GetMesh();
@@ -87,7 +82,6 @@ void Renderer::Update(const float time)
         transform.SetRotation(glm::vec3(0.0f, time * 50.0f, 0.0f));
     }
 }
-
 
 void Renderer::Draw() const
 {
