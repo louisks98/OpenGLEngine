@@ -2,23 +2,22 @@
 // Created by louis on 10/25/25.
 //
 
+#include "glad/glad.h"
 #include "Renderer.h"
+#include "Model.h"
 
-#include <ranges>
 #include <utility>
 #include <GLFW/glfw3.h>
 
-#include "Model.h"
-#include "glad/glad.h"
 
-Renderer::Renderer(std::vector<Model> meshes, const ShaderProgram &shader)
+Renderer::Renderer(std::vector<Model> meshes, std::vector<Light> lightsParam) :
+models(std::move(meshes)),
+lights(std::move(lightsParam)),
+projection(glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f))
 {
     renderObjects = std::map<Model *, RenderObject>();
-    models = std::move(meshes);
-    program = shader;
-    camera = Camera();
     view = glm::mat4(1.0f);
-    projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+    camera = Camera();
     Initialize();
 }
 
@@ -48,16 +47,16 @@ void Renderer::Initialize()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(uint32_t), indices->data(), GL_STATIC_DRAW);
 
-        // Vertex position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), static_cast<void *>(nullptr));
+        // Vertex position attribute (location 0)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), static_cast<void *>(nullptr));
         glEnableVertexAttribArray(0);
 
-        // Color position attribute
-        //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
-        //glEnableVertexAttribArray(1);
+        // Vertex normal attribute (location 1)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
 
-        // Texture coords attribute
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,  5 * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
+        // Texture coords attribute (location 2)
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void *>(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -83,7 +82,7 @@ void Renderer::Update(const float time)
     }
 }
 
-void Renderer::Draw() const
+void Renderer::Render()
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -92,14 +91,19 @@ void Renderer::Draw() const
     {
         Mesh& mesh = model->GetMesh();
         Transform& transform = model->GetTransform();
-        auto matrix = transform.GetMatrix();
-        auto texture = model->GetTexture();
-        texture.Bind();
+        auto modelMatrix = transform.GetMatrix();
+        glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));
 
-        program.Use();
-        program.SetUniform("projection", projection);
-        program.SetUniform("view", view);
-        program.SetUniform("model", matrix);
+        model->Render(TransformMatrix{projection, view, modelMatrix, normalMatrix});
+        Shader& shader = model->GetMaterial().GetShader();
+
+        if (!lights.empty())
+        {
+            shader.SetUniformVec3("viewPos", camera.GetTransform().GetPosition());
+            shader.SetUniformVec3("light.color", lights[0].GetColor());
+            shader.SetUniformFloat("light.intensity", lights[0].GetIntensity());
+            shader.SetUniformVec3("light.position", lights[0].GetTransform().GetPosition());
+        }
 
         glBindVertexArray(renderObject.VAO);
         glDrawElements(GL_TRIANGLES, mesh.GetIndices()->size(), GL_UNSIGNED_INT, nullptr);

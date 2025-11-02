@@ -7,11 +7,9 @@ find_package(glfw3 REQUIRED)
 
 
 add_executable(OpenGLEngine main.cpp glad.c
+        src/HelperFunctions.h
         src/Shader.cpp
         src/Shader.h
-        src/HelperFunctions.h
-        src/ShaderProgram.cpp
-        src/ShaderProgram.h
         src/Mesh.cpp
         src/Mesh.h
         include/stb_image.cpp
@@ -28,6 +26,9 @@ add_executable(OpenGLEngine main.cpp glad.c
         src/Camera.cpp
         src/Camera.h
         src/Transformable.h
+        src/Material.cpp
+        src/Material.h
+        src/Light.h
 )
 target_include_directories(OpenGLEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(OpenGLEngine PRIVATE glfw OpenGL::GL)

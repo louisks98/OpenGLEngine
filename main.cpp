@@ -6,7 +6,7 @@
 #include "src/PrimitiveFactory.h"
 #include "src/Renderer.h"
 #include "src/Shader.h"
-#include "src/ShaderProgram.h"
+#include "src/Shader.h"
 #include "src/Texture.h"
 
 using namespace std;
@@ -104,29 +104,31 @@ int main() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
-    auto vertex = Shader{"vertex", VERTEX ,"./shader/vertex.vert"};
-    auto frag = Shader{"fragment", FRAGMENT, "./shader/fragment.frag"};
-    vertex.Compile();
-    frag.Compile();
-    const auto program = ShaderProgram{&vertex, &frag};
-    program.Link();
+    auto shader = std::make_shared<Shader>("./shader/vertex.glsl", "./shader/phong.glsl");
+    auto material = Material();
+    material.SetShader(shader);
+    material.SetMainColor(glm::vec3(0.07568f,0.61424f,0.07568f));
+    material.SetSpecularColor(glm::vec3(0.633f, 0.727811f, 0.633f));
+    material.SetShininess(32.0f);
 
-    const auto texture = Texture{"image/container.jpg"};
+    //const auto texture = Texture{"image/container.jpg"};
     auto cube = PrimitiveFactory::CreateCube();
-    cube.SetTexture(texture);
-    cube.GetTransform().SetPosition(glm::vec3(0, 0, 0));
+    cube.GetTransform().SetPosition(glm::vec3(2, 3, 2));
+    cube.SetMaterial(material);
 
     auto cube2 = PrimitiveFactory::CreateCube();
-    cube2.SetTexture(texture);
     cube2.GetTransform().SetPosition(glm::vec3(1.5f, 2.0f, -2.0f));
+    cube2.SetMaterial(material);
 
     auto cube3 = PrimitiveFactory::CreateCube();
-    cube3.SetTexture(texture);
     cube3.GetTransform().SetPosition(glm::vec3(1.0f, -2.0f, -4.0f));
+    cube3.SetMaterial(material);
 
-    auto meshes = std::vector{cube, cube2, cube3};
-    auto Shaders = std::vector{program};
-    auto renderer = Renderer(meshes, program);
+    auto light = Light();
+
+    auto models = std::vector{cube, cube2, cube3};
+    auto lights = std::vector{light};
+    auto renderer = Renderer(models, lights);
     Camera& camera = renderer.GetCamera();
     camera.SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 
@@ -145,7 +147,7 @@ int main() {
         processInput(window);
         processCameraInputs(window, camera, deltaTime);
         renderer.Update(currentFrame);
-        renderer.Draw();
+        renderer.Render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

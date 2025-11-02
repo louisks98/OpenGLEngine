@@ -4,8 +4,17 @@
 
 #include "Model.h"
 
-Model::Model(const Mesh &mesh) : mesh(mesh) {
+Model::Model(const Mesh &mesh) : mesh(mesh)
+{
     transform = Transform();
 }
 
-void Model::SetTexture(Texture tex) { this->texture = std::move(tex);}
+void Model::Render(const TransformMatrix &matrix) const
+{
+    const Shader& shader = material.GetShader();
+    material.Render();
+    shader.SetUniformMat4("projection", matrix.projection);
+    shader.SetUniformMat4("view", matrix.view);
+    shader.SetUniformMat4("model", matrix.model);
+    shader.SetUniformMat3("normalMat", matrix.normal);
+}

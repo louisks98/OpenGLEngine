@@ -6,31 +6,28 @@
 #define OPENGLENGINE_SHADER_H
 #include <string>
 
-#include "glad/glad.h"
+#include "Shader.h"
+#include <glm/gtc/matrix_transform.hpp>
 
-enum ShaderType
-{
-    VERTEX = GL_VERTEX_SHADER,
-    FRAGMENT = GL_FRAGMENT_SHADER,
-};
 
 class Shader
 {
 public:
-    Shader(std::string name, ShaderType type, const std::string& path);
+    Shader() = default;
+    Shader(const std::string &pathVert, const std::string &pathFrag);
 
-    [[nodiscard]]
-    unsigned int GetShaderId() const;
-    void Delete() const;
-
-    void Compile() const;
-
+    void Link() const;
+    void Use() const;
+    void SetUniformMat4(const std::string& name, const glm::mat4 &value) const;
+    void SetUniformMat3(const std::string& name, const glm::mat3 &value) const;
+    void SetUniformVec3(const std::string& name, const glm::vec3 &value) const;
+    void SetUniformFloat(const std::string& name, float value) const;
 private:
-    unsigned int Id;
-    std::string Name;
-    ShaderType Type;
-    std::string Path;
-    std::string Content;
+    unsigned int program;
+    uint32_t vertex;
+    uint32_t fragment;
+
+    static void Compile(uint32_t Id, const std::string &path, const std::string &content);
 };
 
 

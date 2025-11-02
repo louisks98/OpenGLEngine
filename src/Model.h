@@ -5,10 +5,17 @@
 #ifndef OPENGLENGINE_MODEL_H
 #define OPENGLENGINE_MODEL_H
 
+#include "Material.h"
 #include "Mesh.h"
-#include "Texture.h"
 #include "Transformable.h"
 
+struct TransformMatrix
+{
+    glm::mat4 projection;
+    glm::mat4 view;
+    glm::mat4 model;
+    glm::mat3 normal;
+};
 
 class Model : public Transformable
 {
@@ -17,14 +24,13 @@ public:
 
     [[nodiscard]]
     Mesh& GetMesh() { return mesh;}
-    [[nodiscard]]
-    Texture& GetTexture() { return texture;}
-
-    void SetTexture(Texture texture);
+    void SetMaterial(const Material& mat) {material = mat;};
+    Material& GetMaterial() { return material;}
+    void Render(const TransformMatrix &matrix) const;
 
 private:
     Mesh mesh;
-    Texture texture;
+    Material material;
 };
 
 

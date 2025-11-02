@@ -7,8 +7,8 @@
 #include <map>
 
 #include "Camera.h"
+#include "Light.h"
 #include "Model.h"
-#include "ShaderProgram.h"
 
 struct RenderObject
 {
@@ -20,10 +20,10 @@ struct RenderObject
 class Renderer
 {
 public:
-    Renderer(std::vector<Model> meshes, const ShaderProgram &shader);
+    Renderer(std::vector<Model> meshes, std::vector<Light> lightsParam);
     void Initialize();
     void Update(float time);
-    void Draw() const;
+    void Render();
     Camera& GetCamera() {return camera;};
 
 private:
@@ -31,10 +31,10 @@ private:
 
     std::map<Model*, RenderObject> renderObjects;
     std::vector<Model> models;
-    ShaderProgram program;
+    std::vector<Light> lights;
 
     glm::mat4 projection;
-    glm::mat4 view;
+    glm::mat4 view{};
 };
 
 
