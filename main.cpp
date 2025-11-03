@@ -105,28 +105,50 @@ int main() {
 
 
     auto shader = std::make_shared<Shader>("./shader/vertex.glsl", "./shader/phong.glsl");
-    auto material = Material();
-    material.SetShader(shader);
-    material.SetMainColor(glm::vec3(0.07568f,0.61424f,0.07568f));
-    material.SetSpecularColor(glm::vec3(0.633f, 0.727811f, 0.633f));
-    material.SetShininess(32.0f);
+    auto emeraldMat = Material();
+    emeraldMat.SetShader(shader);
+    emeraldMat.SetMainColor(glm::vec3(0.07568f,0.61424f,0.07568f));
+    emeraldMat.SetSpecularColor(glm::vec3(0.633f, 0.727811f, 0.633f));
+    emeraldMat.SetShininess(76.8f);
 
     //const auto texture = Texture{"image/container.jpg"};
-    auto cube = PrimitiveFactory::CreateCube();
-    cube.GetTransform().SetPosition(glm::vec3(2, 3, 2));
-    cube.SetMaterial(material);
+    auto sphere = PrimitiveFactory::CreateSphere();
+    sphere.GetTransform().SetPosition(glm::vec3(0, 0, 4));
+    sphere.SetMaterial(emeraldMat);
+
+    auto bronzeMat = Material();
+    bronzeMat.SetShader(shader);
+    bronzeMat.SetMainColor(glm::vec3(0.714f,0.4284f,0.18144f));
+    bronzeMat.SetSpecularColor(glm::vec3(0.393548f,0.4284f,0.271906f));
+    bronzeMat.SetShininess(25.6f);
 
     auto cube2 = PrimitiveFactory::CreateCube();
-    cube2.GetTransform().SetPosition(glm::vec3(1.5f, 2.0f, -2.0f));
-    cube2.SetMaterial(material);
+    cube2.GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, -4.0f));
+    cube2.SetMaterial(bronzeMat);
 
-    auto cube3 = PrimitiveFactory::CreateCube();
-    cube3.GetTransform().SetPosition(glm::vec3(1.0f, -2.0f, -4.0f));
-    cube3.SetMaterial(material);
+    auto redPlasticMat = Material();
+    redPlasticMat.SetShader(shader);
+    redPlasticMat.SetMainColor(glm::vec3(0.5f, 0.0f, 0.0f));
+    redPlasticMat.SetSpecularColor(glm::vec3(0.7f, 0.6f, 0.6f));
+    redPlasticMat.SetShininess(32.0f);
+
+    auto sphere2 = PrimitiveFactory::CreateSphere();
+    sphere2.GetTransform().SetPosition(glm::vec3(4.0f, 0.0f, 0.0f));
+    sphere2.SetMaterial(redPlasticMat);
+
+    auto cyanRubber = Material();
+    cyanRubber.SetShader(shader);
+    cyanRubber.SetMainColor(glm::vec3(0.4f, 0.5f, 0.5f));
+    cyanRubber.SetSpecularColor(glm::vec3(0.4f, 0.7f, 0.7f));
+    cyanRubber.SetShininess(100.0f);
+
+    auto cube4 = PrimitiveFactory::CreateCube();
+    cube4.GetTransform().SetPosition(glm::vec3(-4.0f, 0.0f, 0.0f));
+    cube4.SetMaterial(cyanRubber);
 
     auto light = Light();
 
-    auto models = std::vector{cube, cube2, cube3};
+    auto models = std::vector{sphere, cube2, sphere2, cube4};
     auto lights = std::vector{light};
     auto renderer = Renderer(models, lights);
     Camera& camera = renderer.GetCamera();
