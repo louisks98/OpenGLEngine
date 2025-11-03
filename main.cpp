@@ -107,20 +107,19 @@ int main() {
     auto shader = std::make_shared<Shader>("./shader/vertex.glsl", "./shader/phong.glsl");
     auto emeraldMat = Material();
     emeraldMat.SetShader(shader);
-    emeraldMat.SetMainColor(glm::vec3(0.07568f,0.61424f,0.07568f));
-    emeraldMat.SetSpecularColor(glm::vec3(0.633f, 0.727811f, 0.633f));
-    emeraldMat.SetShininess(76.8f);
+    emeraldMat.SetColorProperty("material.mainColor", glm::vec3(0.07568f,0.61424f,0.07568f));
+    emeraldMat.SetColorProperty("material.specular", glm::vec3(0.633f, 0.727811f, 0.633f));
+    emeraldMat.SetFloatProperty("material.shininess", 76.8f);
 
-    //const auto texture = Texture{"image/container.jpg"};
     auto sphere = PrimitiveFactory::CreateSphere();
     sphere.GetTransform().SetPosition(glm::vec3(0, 0, 4));
     sphere.SetMaterial(emeraldMat);
 
     auto bronzeMat = Material();
     bronzeMat.SetShader(shader);
-    bronzeMat.SetMainColor(glm::vec3(0.714f,0.4284f,0.18144f));
-    bronzeMat.SetSpecularColor(glm::vec3(0.393548f,0.4284f,0.271906f));
-    bronzeMat.SetShininess(25.6f);
+    bronzeMat.SetColorProperty("material.mainColor",glm::vec3(0.714f,0.4284f,0.18144f));
+    bronzeMat.SetColorProperty("material.specular",glm::vec3(0.393548f,0.4284f,0.271906f));
+    bronzeMat.SetFloatProperty("material.shininess", 25.6f);
 
     auto cube2 = PrimitiveFactory::CreateCube();
     cube2.GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, -4.0f));
@@ -128,23 +127,26 @@ int main() {
 
     auto redPlasticMat = Material();
     redPlasticMat.SetShader(shader);
-    redPlasticMat.SetMainColor(glm::vec3(0.5f, 0.0f, 0.0f));
-    redPlasticMat.SetSpecularColor(glm::vec3(0.7f, 0.6f, 0.6f));
-    redPlasticMat.SetShininess(32.0f);
+    redPlasticMat.SetColorProperty("material.mainColor",glm::vec3(0.5f, 0.0f, 0.0f));
+    redPlasticMat.SetColorProperty("material.specular",glm::vec3(0.7f, 0.6f, 0.6f));
+    redPlasticMat.SetFloatProperty("material.shininess", 32.0f);
 
     auto sphere2 = PrimitiveFactory::CreateSphere();
     sphere2.GetTransform().SetPosition(glm::vec3(4.0f, 0.0f, 0.0f));
     sphere2.SetMaterial(redPlasticMat);
 
-    auto cyanRubber = Material();
-    cyanRubber.SetShader(shader);
-    cyanRubber.SetMainColor(glm::vec3(0.4f, 0.5f, 0.5f));
-    cyanRubber.SetSpecularColor(glm::vec3(0.4f, 0.7f, 0.7f));
-    cyanRubber.SetShininess(100.0f);
+    auto mapShader = std::make_shared<Shader>("shader/vertex.glsl", "shader/phong_maps.glsl");
+    auto diffuseTexture = std::make_shared<Texture>("image/container2_diffuse.png");
+    auto specularTexture = std::make_shared<Texture>("image/container2_specular.png");
+    auto container = Material();
+    container.SetShader(mapShader);
+    container.SetTextureProperty("material.diffuse", diffuseTexture);
+    container.SetTextureProperty("material.specular", specularTexture);
+    container.SetFloatProperty("material.shininess", 28.0f);
 
     auto cube4 = PrimitiveFactory::CreateCube();
     cube4.GetTransform().SetPosition(glm::vec3(-4.0f, 0.0f, 0.0f));
-    cube4.SetMaterial(cyanRubber);
+    cube4.SetMaterial(container);
 
     auto light = Light();
 

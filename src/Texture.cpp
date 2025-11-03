@@ -13,7 +13,7 @@ Texture::Texture(const std::string &source)
 {
     SourcePath = source;
     int width, height, nrChannels;
-    const unsigned char *data = stbi_load(source.c_str(), &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load(source.c_str(), &width, &height, &nrChannels, 0);
 
     glGenTextures(1, &Id);
     glBindTexture(GL_TEXTURE_2D, Id);
@@ -25,17 +25,20 @@ Texture::Texture(const std::string &source)
 
     if (data)
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data);
     }
     else
     {
-        std::cout << "Failed to load texture" << std::endl;
+        std::cout << "Failed to load texture: " << source << std::endl;
     }
 }
 
-void Texture::Bind() const
+void Texture::Bind(unsigned int textureUnit) const
 {
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
     glBindTexture(GL_TEXTURE_2D, Id);
 }
 

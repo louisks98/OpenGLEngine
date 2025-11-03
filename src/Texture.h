@@ -12,7 +12,9 @@ public:
     Texture() = default;
     Texture(const std::string &source);
 
-    void Bind() const;
+    [[nodiscard]]
+    unsigned int GetId() const { return Id; };
+    void Bind(unsigned int textureUnit = 0) const;
 private:
     unsigned int Id;
     std::string SourcePath;

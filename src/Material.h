@@ -4,13 +4,13 @@
 
 #ifndef OPENGLENGINE_MATERIAL_H
 #define OPENGLENGINE_MATERIAL_H
+#include <map>
 #include <memory>
-#include <utility>
+#include <optional>
 
 #include "Shader.h"
 #include "Texture.h"
 #include "glm/vec3.hpp"
-
 
 class Material
 {
@@ -22,21 +22,24 @@ public:
     void SetShader(const std::shared_ptr<Shader> &shdr) { shader = shdr;};
 
     [[nodiscard]]
-    Texture& GetTexture() const { return *texture;}
-    void SetTexture(const std::shared_ptr<Texture> &tex) {texture = tex;};
+    std::optional<glm::vec3> GetColorProperty(const std::string &name) const;
+    void SetColorProperty(const std::string &name, glm::vec3 color);
 
-    void SetMainColor(const glm::vec3 newColor) {mainColor = newColor;};
-    void SetSpecularColor(const glm::vec3 newSpecularColor) {specular = newSpecularColor;};
-    void SetShininess(const float newShininess) {shininess = newShininess;};
+    [[nodiscard]]
+    std::optional<float> GetFloatProperty(const std::string &name) const;
+    void SetFloatProperty(const std::string &name, float value);
+
+    [[nodiscard]]
+    std::optional<std::shared_ptr<Texture>> GetTextureProperty(const std::string &name) const;
+    void SetTextureProperty(const std::string &name, const std::shared_ptr<Texture> &texture);
 
     void Render() const;
 private:
-    glm::vec3 mainColor;
-    glm::vec3 specular;
-    float shininess;
+    std::map<std::string, glm::vec3> colorProperties;
+    std::map<std::string, float> floatProperties;
+    std::map<std::string, std::shared_ptr<Texture>> textureProperties;
 
     std::shared_ptr<Shader> shader = nullptr;
-    std::shared_ptr<Texture> texture = nullptr;
 };
 
 #endif //OPENGLENGINE_MATERIAL_H
