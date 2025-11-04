@@ -1,17 +1,9 @@
 #version 460 core
-struct Material
-{
-    sampler2D diffuse;
-    sampler2D specular;
-    float shininess;
-};
+#include "common/structures.glsl"
+#include "common/lighting.glsl"
 
-struct Light
-{
-    vec3 position;
-    vec3 color;
-    float intensity;
-};
+#define MAX_POINT_LIGHTS 4
+#define MAX_SPOT_LIGHTS 4
 
 in vec3 Normal;
 in vec3 FragPos;
@@ -19,8 +11,13 @@ in vec2 texCoord;
 
 out vec4 FragColor;
 
-uniform Material material;
-uniform Light light;
+uniform MaterialMaps material;
+uniform DirectionalLight directionalLight;
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
+uniform int numPointLights;
+uniform int numSpotLights;
+
 uniform vec3 viewPos;
 
 void main()
@@ -28,19 +25,20 @@ void main()
     vec3 diffTexSampling = texture(material.diffuse, texCoord).rgb;
     vec3 specTexSampling = texture(material.specular, texCoord).rgb;
 
-    float ambientStrength = 0.1;
-    vec3 ambient = diffTexSampling * light.color * ambientStrength;
+    vec3 outputColor = CalculatePhongDirectionalLighting(Normal, FragPos, viewPos,
+    directionalLight, diffTexSampling, specTexSampling, material.shininess);
 
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(light.position - FragPos);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = (light.color * light.intensity) * (diff * diffTexSampling);
+    for(int i = 0; i < numPointLights; i++)
+    {
+        outputColor += CalculatePhongPointLighting(Normal, FragPos, viewPos,
+        pointLights[i], diffTexSampling, specTexSampling, material.shininess);
+    }
 
-    vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0) , material.shininess);
-    vec3 specular = (light.color * light.intensity) * (spec * specTexSampling);
+    for(int i = 0; i < numSpotLights; i++)
+    {
+        outputColor += CalculatePhongSpotLighting(Normal, FragPos, viewPos,
+        spotLights[i], diffTexSampling, specTexSampling, material.shininess);
+    }
 
-    vec3 color = ambient + diffuse + specular;
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(outputColor, 1.0);
 }

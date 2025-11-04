@@ -6,7 +6,6 @@
 #include "src/PrimitiveFactory.h"
 #include "src/Renderer.h"
 #include "src/Shader.h"
-#include "src/Shader.h"
 #include "src/Texture.h"
 
 using namespace std;
@@ -148,11 +147,29 @@ int main() {
     cube4.GetTransform().SetPosition(glm::vec3(-4.0f, 0.0f, 0.0f));
     cube4.SetMaterial(container);
 
-    auto light = Light();
+    auto pointLight = Light();
+    pointLight.SetType(LightType::Point);
+    pointLight.SetLinear(0.09f);
+    pointLight.SetQuadratic(0.032f);
+    pointLight.GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+
+    auto directionalLight = Light();
+    directionalLight.SetType(LightType::Directional);
+    directionalLight.SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+    directionalLight.setDirection(glm::vec3(0.2f, -1.0f, 0.3f));
+
+    auto spotLight = Light();
+    spotLight.SetType(LightType::Spot);
+    spotLight.SetColor(glm::vec3(1.0f, 1.0f, 0.0f));
+    spotLight.setDirection(glm::vec3(0.5f, -1.0f, 0.0f));
+    spotLight.GetTransform().SetPosition(glm::vec3(4.0f, 1.5f, 0.0f));
+    spotLight.SetCutoff(glm::cos(glm::radians(20.0f)));
+
 
     auto models = std::vector{sphere, cube2, sphere2, cube4};
-    auto lights = std::vector{light};
-    auto renderer = Renderer(models, lights);
+    auto pointLights = std::vector{pointLight};
+    auto spotLights = std::vector{spotLight};
+    auto renderer = Renderer(models, directionalLight, pointLights, spotLights);
     Camera& camera = renderer.GetCamera();
     camera.SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 

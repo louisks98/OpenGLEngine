@@ -20,7 +20,7 @@ struct RenderObject
 class Renderer
 {
 public:
-    Renderer(std::vector<Model> meshes, std::vector<Light> lightsParam);
+    Renderer(std::vector<Model> meshes, Light directional, std::vector<Light> pLights, std::vector<Light> spLights);
     void Initialize();
     void Update(float time);
     void Render();
@@ -31,7 +31,9 @@ private:
 
     std::map<Model*, RenderObject> renderObjects;
     std::vector<Model> models;
-    std::vector<Light> lights;
+    Light directionalLight;
+    std::vector<Light> pointLights;
+    std::vector<Light> spotLights;
 
     glm::mat4 projection;
     glm::mat4 view{};

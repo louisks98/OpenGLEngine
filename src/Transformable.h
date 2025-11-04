@@ -12,6 +12,9 @@ class Transformable {
     [[nodiscard]]
     Transform& GetTransform() { return transform;}
 
+    [[nodiscard]]
+    const Transform& GetTransform() const { return transform;}
+
 protected:
     Transform transform;
 };

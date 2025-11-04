@@ -10,9 +10,11 @@
 #include <GLFW/glfw3.h>
 
 
-Renderer::Renderer(std::vector<Model> meshes, std::vector<Light> lightsParam) :
+Renderer::Renderer(std::vector<Model> meshes,Light directional, std::vector<Light> pLights, std::vector<Light> spLights) :
 models(std::move(meshes)),
-lights(std::move(lightsParam)),
+pointLights(std::move(pLights)),
+spotLights(std::move(spLights)),
+directionalLight(directional),
 projection(glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f))
 {
     renderObjects = std::map<Model *, RenderObject>();
@@ -97,13 +99,17 @@ void Renderer::Render()
         model->Render(TransformMatrix{projection, view, modelMatrix, normalMatrix});
         Shader& shader = model->GetMaterial().GetShader();
 
-        if (!lights.empty())
-        {
-            shader.SetUniformVec3("viewPos", camera.GetTransform().GetPosition());
-            shader.SetUniformVec3("light.color", lights[0].GetColor());
-            shader.SetUniformFloat("light.intensity", lights[0].GetIntensity());
-            shader.SetUniformVec3("light.position", lights[0].GetTransform().GetPosition());
-        }
+        shader.SetUniformVec3("viewPos", camera.GetTransform().GetPosition());
+        shader.SetLight(directionalLight);
+
+        shader.SetUniformInt("numPointLights", pointLights.size());
+        if (!pointLights.empty())
+            shader.SetLights(pointLights);
+
+        shader.SetUniformInt("numSpotLights", spotLights.size());
+        if (!spotLights.empty())
+            shader.SetLights(spotLights);
+
 
         glBindVertexArray(renderObject.VAO);
         glDrawElements(GL_TRIANGLES, mesh.GetIndices()->size(), GL_UNSIGNED_INT, nullptr);

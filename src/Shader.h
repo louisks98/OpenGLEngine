@@ -9,6 +9,8 @@
 #include "Shader.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Light.h"
+
 
 class Shader
 {
@@ -23,6 +25,8 @@ public:
     void SetUniformVec3(const std::string& name, const glm::vec3 &value) const;
     void SetUniformFloat(const std::string& name, float value) const;
     void SetUniformInt(const std::string& name, int value) const;
+    void SetLight(const Light &light, const std::string &index = "") const;
+    void SetLights(const std::vector<Light>& lights) const;
 private:
     unsigned int program;
     uint32_t vertex;

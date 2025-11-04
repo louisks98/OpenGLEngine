@@ -6,17 +6,49 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <filesystem>
 #include "HelperFunctions.h"
 #include "glad/glad.h"
+
+#include <regex>
+inline  static std::string ProcessIncludes(const std::string& source, const std::string& directory)
+{
+    std::string result = source;
+    std::regex includeRegex(R"###(#include\s+"([^"]+)")###");
+    std::smatch match;
+
+    while (std::regex_search(result, match, includeRegex))
+    {
+        const std::string includePath = directory + "/" + match[1].str();
+        const std::string includeContent = ReadFile(includePath);
+
+        // Recursively process includes in the included file
+        const std::string processedInclude = ProcessIncludes(includeContent, directory);
+
+        // Replace the #include directive with the file content
+        result = result.substr(0, match.position()) + processedInclude + result.substr(match.position() + match.length());
+    }
+
+    return result;
+}
 
 Shader::Shader(const std::string &pathVert, const std::string &pathFrag)
 {
     const uint32_t vertId = glCreateShader(GL_VERTEX_SHADER);
-    const std::string vertContent = ReadFile(pathVert);
+    std::string vertContent = ReadFile(pathVert);
+
+    // Get directory from path for resolving includes
+    const std::string vertDir = std::filesystem::path(pathVert).parent_path().string();
+    vertContent = ProcessIncludes(vertContent, vertDir);
+
     Compile(vertId, pathVert, vertContent);
 
     const uint32_t fragId = glCreateShader(GL_FRAGMENT_SHADER);
-    const std::string fragContent = ReadFile(pathFrag);
+    std::string fragContent = ReadFile(pathFrag);
+
+    const std::string fragDir = std::filesystem::path(pathFrag).parent_path().string();
+    fragContent = ProcessIncludes(fragContent, fragDir);
+
     Compile(fragId, pathFrag, fragContent);
 
     vertex = vertId;
@@ -95,6 +127,42 @@ void Shader::SetUniformInt(const std::string &name, const int value) const
     const int location = glGetUniformLocation(program, name.c_str());
     glUniform1i(location, value);
 }
+
+void Shader::SetLight(const Light &light, const std::string &index) const
+{
+    switch (light.GetType())
+    {
+       case LightType::Directional:
+            SetUniformVec3("directionalLight.direction", light.GetDirection());
+            SetUniformVec3("directionalLight.color", light.GetColor());
+            SetUniformFloat("directionalLight.intensity", light.GetIntensity());
+            break;
+        case LightType::Point:
+            SetUniformVec3("pointLights[" + index + "].position", light.GetTransform().GetPosition());
+            SetUniformVec3("pointLights[" + index + "].color", light.GetColor());
+            SetUniformFloat("pointLights[" + index + "].intensity", light.GetIntensity());
+            SetUniformFloat("pointLights[" + index + "].constant", Light::GetConstant());
+            SetUniformFloat("pointLights[" + index + "].linear", light.GetLinear());
+            SetUniformFloat("pointLights[" + index + "].quadratic", light.GetQuadratic());
+            break;
+
+        case LightType::Spot:
+            SetUniformVec3("spotLights[" + index + "].position", light.GetTransform().GetPosition());
+            SetUniformVec3("spotLights[" + index + "].spotDirection", light.GetDirection());
+            SetUniformVec3("spotLights[" + index + "].color", light.GetColor());
+            SetUniformFloat("spotLights[" + index + "].intensity", light.GetIntensity());
+            SetUniformFloat("spotLights[" + index + "].cutoff", light.GetCutoff());
+            break;
+    };
+}
+
+void Shader::SetLights(const std::vector<Light>& lights) const
+{
+    for (size_t i = 0; i < lights.size(); i++)
+        SetLight(lights[i], std::to_string(i));
+}
+
+
 
 
 
