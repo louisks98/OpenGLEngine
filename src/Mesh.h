@@ -9,19 +9,33 @@
 
 #include "glm/glm.hpp"
 
+struct vertex
+{
+    glm::vec3 Position;
+    glm::vec3 Color;
+    glm::vec3 Normal;
+    glm::vec2 TexCoord;
+};
+
+
 class Mesh {
 public:
-    Mesh(float vertices[], uint32_t vSize,  uint32_t indices[], uint32_t iSize);
+    Mesh(const std::vector<vertex>& vertices, const std::vector<uint32_t>& indices);
     Mesh(const Mesh& mesh);
 
     [[nodiscard]]
     uint32_t GetId() const;
-    std::vector<float>* GetVertices();
-    std::vector<uint32_t>* GetIndices();
+
+    [[nodiscard]]
+    const std::vector<vertex>& GetVertices() const { return vertices; }
+
+    [[nodiscard]]
+    const std::vector<uint32_t>& GetIndices() const { return indices; }
+
 private:
     uint32_t Id = rand();
-    std::vector<float> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<vertex> vertices;
+    std::vector<uint32_t> indices;
 };
 
 #endif //OPENGLENGINE_PRIMITIVE_H

@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "src/Mesh.h"
+#include "src/ModelImporter.h"
 #include "src/PrimitiveFactory.h"
 #include "src/Renderer.h"
 #include "src/Shader.h"
@@ -103,75 +104,117 @@ int main() {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
-    auto shader = std::make_shared<Shader>("./shader/vertex.glsl", "./shader/phong.glsl");
+    auto phongShader = std::make_shared<Shader>("./shader/vertex.glsl", "./shader/phong.glsl");
     auto emeraldMat = Material();
-    emeraldMat.SetShader(shader);
+    emeraldMat.SetShader(phongShader);
     emeraldMat.SetColorProperty("material.mainColor", glm::vec3(0.07568f,0.61424f,0.07568f));
     emeraldMat.SetColorProperty("material.specular", glm::vec3(0.633f, 0.727811f, 0.633f));
     emeraldMat.SetFloatProperty("material.shininess", 76.8f);
 
     auto sphere = PrimitiveFactory::CreateSphere();
-    sphere.GetTransform().SetPosition(glm::vec3(0, 0, 4));
+    sphere.GetTransform().SetPosition(glm::vec3(1.7, 0.5f, -2.5));
     sphere.SetMaterial(emeraldMat);
 
-    auto bronzeMat = Material();
-    bronzeMat.SetShader(shader);
-    bronzeMat.SetColorProperty("material.mainColor",glm::vec3(0.714f,0.4284f,0.18144f));
-    bronzeMat.SetColorProperty("material.specular",glm::vec3(0.393548f,0.4284f,0.271906f));
-    bronzeMat.SetFloatProperty("material.shininess", 25.6f);
-
-    auto cube2 = PrimitiveFactory::CreateCube();
-    cube2.GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, -4.0f));
-    cube2.SetMaterial(bronzeMat);
-
     auto redPlasticMat = Material();
-    redPlasticMat.SetShader(shader);
+    redPlasticMat.SetShader(phongShader);
     redPlasticMat.SetColorProperty("material.mainColor",glm::vec3(0.5f, 0.0f, 0.0f));
     redPlasticMat.SetColorProperty("material.specular",glm::vec3(0.7f, 0.6f, 0.6f));
     redPlasticMat.SetFloatProperty("material.shininess", 32.0f);
 
     auto sphere2 = PrimitiveFactory::CreateSphere();
-    sphere2.GetTransform().SetPosition(glm::vec3(4.0f, 0.0f, 0.0f));
+    sphere2.GetTransform().SetPosition(glm::vec3(-2.3f, 0.5f, 1.7f));
     sphere2.SetMaterial(redPlasticMat);
 
-    auto mapShader = std::make_shared<Shader>("shader/vertex.glsl", "shader/phong_maps.glsl");
+    auto plastic = Material();
+    plastic.SetShader(phongShader);
+    plastic.SetColorProperty("material.mainColor",glm::vec3(1.0f,1.0f,1.0f));
+    plastic.SetColorProperty("material.specular",glm::vec3(0.70f,0.70f,0.70f));
+    plastic.SetFloatProperty("material.shininess", 32.0f);
+
+    auto cube1 = PrimitiveFactory::CreateCube();
+    cube1.GetTransform().SetPosition(glm::vec3(0.0f, 2.0f, 4.0f));
+    cube1.GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
+    cube1.SetMaterial(plastic);
+
+    auto cube2 = PrimitiveFactory::CreateCube();
+    cube2.GetTransform().SetPosition(glm::vec3(0.0f, 2.0f, -4.0f));
+    cube2.GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
+    cube2.SetMaterial(plastic);
+
+    auto cube3 = PrimitiveFactory::CreateCube();
+    cube3.GetTransform().SetPosition(glm::vec3(4.0f, 2.0f, 0.0f));
+    cube3.GetTransform().SetRotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    cube3.GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
+    cube3.SetMaterial(plastic);
+
+    auto cube4 = PrimitiveFactory::CreateCube();
+    cube4.GetTransform().SetPosition(glm::vec3(0.0f, 4.0f, 0.0f));
+    cube4.GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
+    cube4.SetMaterial(redPlasticMat);
+
+    auto phongMapsShader = std::make_shared<Shader>("shader/vertex.glsl", "shader/phong_maps.glsl");
     auto diffuseTexture = std::make_shared<Texture>("image/container2_diffuse.png");
     auto specularTexture = std::make_shared<Texture>("image/container2_specular.png");
     auto container = Material();
-    container.SetShader(mapShader);
+    container.SetShader(phongMapsShader);
     container.SetTextureProperty("material.diffuse", diffuseTexture);
     container.SetTextureProperty("material.specular", specularTexture);
     container.SetFloatProperty("material.shininess", 28.0f);
 
-    auto cube4 = PrimitiveFactory::CreateCube();
-    cube4.GetTransform().SetPosition(glm::vec3(-4.0f, 0.0f, 0.0f));
-    cube4.SetMaterial(container);
+    auto cube5 = PrimitiveFactory::CreateCube();
+    cube5.GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    cube5.GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
+    cube5.SetMaterial(container);
 
     auto pointLight = Light();
     pointLight.SetType(LightType::Point);
-    pointLight.SetLinear(0.09f);
-    pointLight.SetQuadratic(0.032f);
-    pointLight.GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    pointLight.SetLinear(0.22f);
+    pointLight.SetQuadratic(0.20f);
+    //pointLight.SetIntensity(0.5);
+    pointLight.GetTransform().SetPosition(glm::vec3(0.0f, 2.7f, 0.0f));
 
     auto directionalLight = Light();
     directionalLight.SetType(LightType::Directional);
     directionalLight.SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+    directionalLight.SetIntensity(0.5f);
     directionalLight.setDirection(glm::vec3(0.2f, -1.0f, 0.3f));
 
     auto spotLight = Light();
     spotLight.SetType(LightType::Spot);
     spotLight.SetColor(glm::vec3(1.0f, 1.0f, 0.0f));
     spotLight.setDirection(glm::vec3(0.5f, -1.0f, 0.0f));
-    spotLight.GetTransform().SetPosition(glm::vec3(4.0f, 1.5f, 0.0f));
-    spotLight.SetCutoff(glm::cos(glm::radians(20.0f)));
+    spotLight.GetTransform().SetPosition(glm::vec3(-0.5f, 2.0f, 0.0f));
+    spotLight.SetCutoff(glm::cos(glm::radians(30.0f)));
+
+    auto models = std::vector{sphere, sphere2,cube1,cube2, cube3,cube4, cube5 };
 
 
-    auto models = std::vector{sphere, cube2, sphere2, cube4};
+    ShaderPool shaderPool(phongShader, phongMapsShader);
+    //auto dragon = ModelImporter::Import("model/dragon.obj", shaderPool);
+    auto bunny = ModelImporter::Import("model/bunny.obj", shaderPool);
+    //auto lego = ModelImporter::Import("model/lego_dragon.dae", shaderPool);
+
+    // if (dragon.has_value())
+    // {
+    //     dragon.value().GetTransform().SetPosition(glm::vec3(0.0f, 0.5f, 0.0f));
+    //     models.push_back(dragon.value());
+    // }
+
+    if (bunny.has_value())
+    {
+        bunny.value().GetTransform().SetPosition(glm::vec3(0.7f, 0.0f, 0.0f));
+        models.push_back(bunny.value());
+    }
+
+    // if (lego.has_value())
+    //     models.push_back(lego.value());
+
     auto pointLights = std::vector{pointLight};
     auto spotLights = std::vector{spotLight};
     auto renderer = Renderer(models, directionalLight, pointLights, spotLights);
     Camera& camera = renderer.GetCamera();
-    camera.SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
+    camera.GetTransform().SetPosition(glm::vec3(-4.0f, 2.0f, 0.0f));
+    camera.SetForward(glm::vec3(1.0f, 0.0f, 0.0f));
 
     glfwSetWindowUserPointer(window, &camera);
     glfwSetCursorPosCallback(window, CameraMouseCallback);

@@ -4,6 +4,7 @@ project(OpenGLEngine)
 set(CMAKE_CXX_STANDARD 20)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(assimp REQUIRED)
 
 
 add_executable(OpenGLEngine main.cpp glad.c
@@ -29,8 +30,11 @@ add_executable(OpenGLEngine main.cpp glad.c
         src/Material.cpp
         src/Material.h
         src/Light.h
+        src/ModelImporter.cpp
+        src/ModelImporter.h
 )
 target_include_directories(OpenGLEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(OpenGLEngine PRIVATE glfw OpenGL::GL)
+target_link_libraries(OpenGLEngine PRIVATE glfw OpenGL::GL assimp::assimp)
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/shader" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/image" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/model" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")

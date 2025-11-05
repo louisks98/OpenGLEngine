@@ -31,8 +31,8 @@ void Renderer::Initialize()
     for (auto &model : models)
     {
         Mesh& mesh = model.GetMesh();
-        const auto vertices = mesh.GetVertices();
-        const auto indices = mesh.GetIndices();
+        const auto& vertices = mesh.GetVertices();
+        const auto& indices = mesh.GetIndices();
 
         uint32_t VAO, VBO, EBO;
         glGenVertexArrays(1, &VAO);
@@ -43,22 +43,22 @@ void Renderer::Initialize()
 
         // Vertex buffer object
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices->size() * sizeof(float), vertices->data(),GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertex), vertices.data(), GL_STATIC_DRAW);
 
         // Element buffer object
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices->size() * sizeof(uint32_t), indices->data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint32_t), indices.data(), GL_STATIC_DRAW);
 
         // Vertex position attribute (location 0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), static_cast<void *>(nullptr));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offsetof(vertex, Position)));
         glEnableVertexAttribArray(0);
 
         // Vertex normal attribute (location 1)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void *>(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offsetof(vertex, Normal)));
         glEnableVertexAttribArray(1);
 
         // Texture coords attribute (location 2)
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), reinterpret_cast<void *>(6 * sizeof(float)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertex), reinterpret_cast<void*>(offsetof(vertex, TexCoord)));
         glEnableVertexAttribArray(2);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -76,12 +76,9 @@ void Renderer::Initialize()
 void Renderer::Update(const float time)
 {
     view = camera.GetViewMatrix();
-    for (auto [model, renderObject] : renderObjects)
-    {
-        Mesh& mesh = model->GetMesh();
-        Transform& transform = model->GetTransform();
-        transform.SetRotation(glm::vec3(0.0f, time * 50.0f, 0.0f));
-    }
+
+    const auto currentPos = pointLights[0].GetTransform().GetPosition();
+    pointLights[0].GetTransform().SetPosition(glm::vec3(glm::cos(time) * 2.5, currentPos.y, glm::sin(time) * 2.5));
 }
 
 void Renderer::Render()
@@ -112,6 +109,6 @@ void Renderer::Render()
 
 
         glBindVertexArray(renderObject.VAO);
-        glDrawElements(GL_TRIANGLES, mesh.GetIndices()->size(), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, mesh.GetIndices().size(), GL_UNSIGNED_INT, nullptr);
     }
 }
