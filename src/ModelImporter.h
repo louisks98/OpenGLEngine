@@ -8,6 +8,7 @@
 #include <string>
 #include <memory>
 #include <utility>
+#include <vector>
 
 
 class Model;
@@ -25,8 +26,8 @@ struct ShaderPool
 class ModelImporter
 {
 public:
-    static std::optional<Model> Import(const std::string& path, const ShaderPool& shaders);
-    static std::optional<Model> Import(const std::string& path);
+    static std::vector<Model> Import(const std::string& path, const ShaderPool& shaders);
+    static std::vector<Model> Import(const std::string& path);
 };
 
 

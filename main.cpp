@@ -101,7 +101,7 @@ int main() {
     }
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 
 
     auto phongShader = std::make_shared<Shader>("./shader/vertex.glsl", "./shader/phong.glsl");
@@ -183,31 +183,36 @@ int main() {
     spotLight.SetType(LightType::Spot);
     spotLight.SetColor(glm::vec3(1.0f, 1.0f, 0.0f));
     spotLight.setDirection(glm::vec3(0.5f, -1.0f, 0.0f));
-    spotLight.GetTransform().SetPosition(glm::vec3(-0.5f, 2.0f, 0.0f));
+    spotLight.GetTransform().SetPosition(glm::vec3(-0.5f, 3.0f, 0.0f));
     spotLight.SetCutoff(glm::cos(glm::radians(30.0f)));
 
     auto models = std::vector{sphere, sphere2,cube1,cube2, cube3,cube4, cube5 };
 
 
     ShaderPool shaderPool(phongShader, phongMapsShader);
-    //auto dragon = ModelImporter::Import("model/dragon.obj", shaderPool);
-    auto bunny = ModelImporter::Import("model/bunny.obj", shaderPool);
-    //auto lego = ModelImporter::Import("model/lego_dragon.dae", shaderPool);
+    //auto bunny = ModelImporter::Import("model/bunny.obj", shaderPool);
 
-    // if (dragon.has_value())
+    // if (bunny.has_value())
     // {
-    //     dragon.value().GetTransform().SetPosition(glm::vec3(0.0f, 0.5f, 0.0f));
-    //     models.push_back(dragon.value());
+    //     bunny.value().GetTransform().SetPosition(glm::vec3(0.7f, 0.0f, 0.0f));
+    //     models.push_back(bunny.value());
     // }
 
-    if (bunny.has_value())
+    auto mitsuba = ModelImporter::Import("model/mitsuba/mitsuba-sphere.obj", shaderPool);
+    for (auto model : mitsuba)
     {
-        bunny.value().GetTransform().SetPosition(glm::vec3(0.7f, 0.0f, 0.0f));
-        models.push_back(bunny.value());
+        model.GetTransform().SetPosition(glm::vec3(0.7f, 0.0f, 0.0f));
+        model.GetTransform().SetRotation(glm::vec3(0.0f, -90.0f, 0.0f));
+        models.push_back(model);
     }
 
-    // if (lego.has_value())
-    //     models.push_back(lego.value());
+    auto lego = ModelImporter::Import("model//lego_dragon.dae", shaderPool);
+    for (auto model : lego)
+    {
+        model.GetTransform().SetPosition(glm::vec3(-3.0f, 0.0f, 0.0f));
+        model.GetTransform().SetScale(glm::vec3(0.01f, 0.01f, 0.01f));
+        models.push_back(model);
+    }
 
     auto pointLights = std::vector{pointLight};
     auto spotLights = std::vector{spotLight};
@@ -219,6 +224,7 @@ int main() {
     glfwSetWindowUserPointer(window, &camera);
     glfwSetCursorPosCallback(window, CameraMouseCallback);
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
     // render loop
