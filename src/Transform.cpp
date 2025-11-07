@@ -20,6 +20,7 @@ void Transform::SetPosition(glm::vec3 position)
 {
     this->position = position;
     positionMatrix = glm::translate(glm::mat4(1.0f), position);
+    isDirty = true;
 }
 
 glm::vec3 Transform::GetRotation() const
@@ -37,6 +38,7 @@ void Transform::SetRotation(glm::vec3 rotation)
     rotationMatrix = glm::rotate(glm::mat4(1.0f), glm::radians(x), glm::vec3(1.0f, 0.0f, 0.0f));
     rotationMatrix = glm::rotate(rotationMatrix, glm::radians(y), glm::vec3(0.0f, 1.0f, 0.0f));
     rotationMatrix = glm::rotate(rotationMatrix, glm::radians(z), glm::vec3(0.0f, 0.0f, 1.0f));
+    isDirty = true;
 }
 
 glm::vec3 Transform::GetScale() const {
@@ -47,11 +49,26 @@ void Transform::SetScale(glm::vec3 scale)
 {
     this->scale = scale;
     scaleMatrix = glm::scale(glm::mat4(1.0f), scale);
+    isDirty = true;
 }
 
-
-glm::mat4 Transform::GetMatrix() const
+glm::mat4 Transform::GetMatrix()
 {
-    return  positionMatrix * rotationMatrix * scaleMatrix;
+    if (isDirty)
+    {
+        UpdateMatrix();
+        isDirty = false;
+    }
+    return modelMatrix;
+}
+
+void Transform::UpdateMatrix()
+{
+    modelMatrix = positionMatrix * rotationMatrix * scaleMatrix;
+}
+
+void Transform::UpdateMatrix(const glm::mat4 &parentMatrix)
+{
+    modelMatrix =  parentMatrix * modelMatrix;
 }
 

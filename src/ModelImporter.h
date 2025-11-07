@@ -4,15 +4,18 @@
 
 #ifndef OPENGLENGINE_MODELIMPORTER_H
 #define OPENGLENGINE_MODELIMPORTER_H
-#include <optional>
 #include <string>
 #include <memory>
-#include <utility>
-#include <vector>
 
-
+// Forward declarations
+class Entity;
+class Mesh;
 class Model;
 class Shader;
+struct aiScene;
+struct aiNode;
+struct aiMesh;
+struct aiMaterial;
 
 struct ShaderPool
 {
@@ -26,8 +29,14 @@ struct ShaderPool
 class ModelImporter
 {
 public:
-    static std::vector<Model> Import(const std::string& path, const ShaderPool& shaders);
-    static std::vector<Model> Import(const std::string& path);
+    static Entity Import(const std::string& path, const ShaderPool& shaders);
+    static Entity Import(const std::string& path);
+
+private:
+    static Entity ImportInternal(const std::string& path, const ShaderPool* shaders = nullptr);
+    static Mesh GenerateVertexData(aiMesh* assimpMesh);
+    static Model GenerateModel(aiMaterial* assimpMaterial, Mesh& mesh, const std::string& directory, const ShaderPool* shaders = nullptr);
+    static void GenerateSceneGraph(Entity& entity, const aiScene* scene, const aiNode* assimpNode, const std::string& directory, const ShaderPool* shaders = nullptr);
 };
 
 

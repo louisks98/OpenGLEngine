@@ -9,14 +9,23 @@
 
 class Texture {
 public:
-    Texture() = default;
+    Texture();
     Texture(const std::string &source);
+    ~Texture();
+
+    // Delete copy operations (can't copy OpenGL textures safely)
+    Texture(const Texture&) = delete;
+    Texture& operator=(const Texture&) = delete;
+
+    // Move operations
+    Texture(Texture&& other) noexcept;
+    Texture& operator=(Texture&& other) noexcept;
 
     [[nodiscard]]
     unsigned int GetId() const { return Id; };
     void Bind(unsigned int textureUnit = 0) const;
 private:
-    unsigned int Id;
+    unsigned int Id = 0;
     std::string SourcePath;
 };
 

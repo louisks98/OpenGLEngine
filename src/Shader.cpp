@@ -11,6 +11,7 @@
 #include "glad/glad.h"
 
 #include <regex>
+#include <utility>
 inline  static std::string ProcessIncludes(const std::string& source, const std::string& directory)
 {
     std::string result = source;
@@ -32,7 +33,13 @@ inline  static std::string ProcessIncludes(const std::string& source, const std:
     return result;
 }
 
+Shader::Shader()
+    : program(0), vertex(0), fragment(0)
+{
+}
+
 Shader::Shader(const std::string &pathVert, const std::string &pathFrag)
+    : program(0), vertex(0), fragment(0)
 {
     const uint32_t vertId = glCreateShader(GL_VERTEX_SHADER);
     std::string vertContent = ReadFile(pathVert);
@@ -55,6 +62,65 @@ Shader::Shader(const std::string &pathVert, const std::string &pathFrag)
     fragment = fragId;
     program = glCreateProgram();
     Link();
+}
+
+Shader::~Shader()
+{
+    if (program != 0)
+    {
+        glDeleteProgram(program);
+        program = 0;
+    }
+}
+
+Shader::Shader(Shader&& other) noexcept
+    : program(other.program),
+      vertex(other.vertex),
+      fragment(other.fragment),
+      uniformLocationCache(std::move(other.uniformLocationCache))
+{
+    other.program = 0;
+    other.vertex = 0;
+    other.fragment = 0;
+}
+
+Shader& Shader::operator=(Shader&& other) noexcept
+{
+    if (this != &other)
+    {
+        // Clean up existing resources
+        if (program != 0)
+        {
+            glDeleteProgram(program);
+        }
+
+        // Transfer ownership
+        program = other.program;
+        vertex = other.vertex;
+        fragment = other.fragment;
+        uniformLocationCache = std::move(other.uniformLocationCache);
+
+        // Reset other
+        other.program = 0;
+        other.vertex = 0;
+        other.fragment = 0;
+    }
+    return *this;
+}
+
+int Shader::GetUniformLocation(const std::string& name) const
+{
+    // Check cache first
+    auto it = uniformLocationCache.find(name);
+    if (it != uniformLocationCache.end())
+    {
+        return it->second;
+    }
+
+    // Not in cache, query OpenGL
+    const int location = glGetUniformLocation(program, name.c_str());
+    uniformLocationCache[name] = location;
+    return location;
 }
 
 void Shader::Compile(const uint32_t Id, const std::string &path, const std::string &content)
@@ -100,31 +166,31 @@ void Shader::Use() const
 
 void Shader::SetUniformMat4(const std::string& name, const glm::mat4 &value) const
 {
-    const int location = glGetUniformLocation(program, name.c_str());
+    const int location = GetUniformLocation(name);
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void Shader::SetUniformMat3(const std::string &name, const glm::mat3 &value) const
 {
-    const int location = glGetUniformLocation(program, name.c_str());
+    const int location = GetUniformLocation(name);
     glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void Shader::SetUniformVec3(const std::string &name, const glm::vec3 &value) const
 {
-    const int location = glGetUniformLocation(program, name.c_str());
+    const int location = GetUniformLocation(name);
     glUniform3fv(location, 1, glm::value_ptr(value));
 }
 
 void Shader::SetUniformFloat(const std::string &name, const float value) const
 {
-    const int location = glGetUniformLocation(program, name.c_str());
+    const int location = GetUniformLocation(name);
     glUniform1f(location, value);
 }
 
 void Shader::SetUniformInt(const std::string &name, const int value) const
 {
-    const int location = glGetUniformLocation(program, name.c_str());
+    const int location = GetUniformLocation(name);
     glUniform1i(location, value);
 }
 

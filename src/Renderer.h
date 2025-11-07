@@ -12,15 +12,25 @@
 
 struct RenderObject
 {
-    uint32_t VAO;
-    uint32_t VBO;
-    uint32_t EBO;
+    uint32_t VAO = 0;
+    uint32_t VBO = 0;
+    uint32_t EBO = 0;
+    size_t indexCount = 0;
+
+    RenderObject() = default;
+    ~RenderObject();
+
+    RenderObject(const RenderObject&) = delete;
+    RenderObject& operator=(const RenderObject&) = delete;
+
+    RenderObject(RenderObject&& other) noexcept;
+    RenderObject& operator=(RenderObject&& other) noexcept;
 };
 
 class Renderer
 {
 public:
-    Renderer(std::vector<Model> meshes, Light directional, std::vector<Light> pLights, std::vector<Light> spLights);
+    Renderer(std::vector<Entity*> entities, Light directional, std::vector<Light> pLights, std::vector<Light> spLights);
     void Initialize();
     void Update(float time);
     void Render();
@@ -30,7 +40,7 @@ private:
     Camera camera;
 
     std::map<Model*, RenderObject> renderObjects;
-    std::vector<Model> models;
+    std::vector<Entity *> Entities;
     Light directionalLight;
     std::vector<Light> pointLights;
     std::vector<Light> spotLights;

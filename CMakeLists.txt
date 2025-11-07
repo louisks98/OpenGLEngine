@@ -26,7 +26,7 @@ add_executable(OpenGLEngine main.cpp glad.c
         src/Transform.h
         src/Camera.cpp
         src/Camera.h
-        src/Transformable.h
+        src/Entity.h
         src/Material.cpp
         src/Material.h
         src/Light.h

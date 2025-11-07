@@ -9,12 +9,63 @@
 #include <utility>
 #include <GLFW/glfw3.h>
 
+RenderObject::~RenderObject()
+{
+    if (VAO != 0)
+    {
+        glDeleteVertexArrays(1, &VAO);
+        VAO = 0;
+    }
+    if (VBO != 0)
+    {
+        glDeleteBuffers(1, &VBO);
+        VBO = 0;
+    }
+    if (EBO != 0)
+    {
+        glDeleteBuffers(1, &EBO);
+        EBO = 0;
+    }
+}
 
-Renderer::Renderer(std::vector<Model> meshes,Light directional, std::vector<Light> pLights, std::vector<Light> spLights) :
-models(std::move(meshes)),
+RenderObject::RenderObject(RenderObject&& other) noexcept:
+VAO(other.VAO),
+VBO(other.VBO),
+EBO(other.EBO),
+indexCount(other.indexCount)
+{
+    other.VAO = 0;
+    other.VBO = 0;
+    other.EBO = 0;
+    other.indexCount = 0;
+}
+
+RenderObject& RenderObject::operator=(RenderObject&& other) noexcept
+{
+    if (this != &other)
+    {
+        if (VAO != 0) glDeleteVertexArrays(1, &VAO);
+        if (VBO != 0) glDeleteBuffers(1, &VBO);
+        if (EBO != 0) glDeleteBuffers(1, &EBO);
+
+        VAO = other.VAO;
+        VBO = other.VBO;
+        EBO = other.EBO;
+        indexCount = other.indexCount;
+
+        other.VAO = 0;
+        other.VBO = 0;
+        other.EBO = 0;
+        other.indexCount = 0;
+    }
+    return *this;
+}
+
+Renderer::Renderer(std::vector<Entity*> entities, Light directional, std::vector<Light> pLights, std::vector<Light> spLights) :
+Entities(std::move(entities)),
+directionalLight(std::move(directional)),
 pointLights(std::move(pLights)),
 spotLights(std::move(spLights)),
-directionalLight(directional),
 projection(glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f))
 {
     renderObjects = std::map<Model *, RenderObject>();
@@ -28,9 +79,13 @@ void Renderer::Initialize()
     glEnable(GL_DEPTH_TEST);
     renderObjects.clear();
 
-    for (auto &model : models)
+    for (auto entity : Entities)
     {
-        Mesh& mesh = model.GetMesh();
+        auto model = static_cast<Model *>(entity);
+        if (model == nullptr)
+            continue;
+
+        Mesh& mesh = model->GetMesh();
         const auto& vertices = mesh.GetVertices();
         const auto& indices = mesh.GetIndices();
 
@@ -68,8 +123,9 @@ void Renderer::Initialize()
         renderObject.VAO = VAO;
         renderObject.VBO = VBO;
         renderObject.EBO = EBO;
+        renderObject.indexCount = indices.size();
 
-        renderObjects[&model] = renderObject;
+        renderObjects[model] = std::move(renderObject);
     }
 }
 
@@ -86,7 +142,7 @@ void Renderer::Render()
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto [model, renderObject] : renderObjects)
+    for (const auto& [model, renderObject] : renderObjects)
     {
         Mesh& mesh = model->GetMesh();
         Transform& transform = model->GetTransform();
@@ -109,6 +165,6 @@ void Renderer::Render()
 
 
         glBindVertexArray(renderObject.VAO);
-        glDrawElements(GL_TRIANGLES, mesh.GetIndices().size(), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, renderObject.indexCount, GL_UNSIGNED_INT, nullptr);
     }
 }

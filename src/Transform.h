@@ -19,7 +19,11 @@ public:
     glm::vec3 GetPosition() const;
     glm::vec3 GetRotation() const;
     glm::vec3 GetScale() const;
-    glm::mat4 GetMatrix() const;
+    glm::mat4 GetMatrix();
+    void UpdateMatrix();
+    void UpdateMatrix(const glm::mat4 &parentMatrix);
+
+    bool IsDirty() const {return isDirty;};
 
 private:
     glm::vec3 position;
@@ -29,6 +33,9 @@ private:
     glm::mat4 positionMatrix;
     glm::mat4 rotationMatrix;
     glm::mat4 scaleMatrix;
+    glm::mat4 modelMatrix;
+
+    bool isDirty = false;
 };
 
 

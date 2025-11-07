@@ -186,37 +186,25 @@ int main() {
     spotLight.GetTransform().SetPosition(glm::vec3(-0.5f, 3.0f, 0.0f));
     spotLight.SetCutoff(glm::cos(glm::radians(30.0f)));
 
-    auto models = std::vector{sphere, sphere2,cube1,cube2, cube3,cube4, cube5 };
-
+    auto models = std::vector<Entity*>{&sphere, &sphere2, &cube1, &cube2, &cube3, &cube4, &cube5 };
 
     ShaderPool shaderPool(phongShader, phongMapsShader);
-    //auto bunny = ModelImporter::Import("model/bunny.obj", shaderPool);
-
-    // if (bunny.has_value())
-    // {
-    //     bunny.value().GetTransform().SetPosition(glm::vec3(0.7f, 0.0f, 0.0f));
-    //     models.push_back(bunny.value());
-    // }
 
     auto mitsuba = ModelImporter::Import("model/mitsuba/mitsuba-sphere.obj", shaderPool);
-    for (auto model : mitsuba)
-    {
-        model.GetTransform().SetPosition(glm::vec3(0.7f, 0.0f, 0.0f));
-        model.GetTransform().SetRotation(glm::vec3(0.0f, -90.0f, 0.0f));
-        models.push_back(model);
-    }
+    mitsuba.GetTransform().SetPosition(glm::vec3(0.7f, 0.0f, 0.0f));
+    mitsuba.GetTransform().SetRotation(glm::vec3(0.0f, -90.0f, 0.0f));
+    models.push_back(&mitsuba);
 
-    auto lego = ModelImporter::Import("model//lego_dragon.dae", shaderPool);
-    for (auto model : lego)
-    {
-        model.GetTransform().SetPosition(glm::vec3(-3.0f, 0.0f, 0.0f));
-        model.GetTransform().SetScale(glm::vec3(0.01f, 0.01f, 0.01f));
-        models.push_back(model);
-    }
+    // auto lego = ModelImporter::Import("model//lego_dragon.dae", shaderPool);
+    // lego.GetTransform().SetPosition(glm::vec3(-3.0f, 0.0f, 0.0f));
+    // lego.GetTransform().SetScale(glm::vec3(0.01f, 0.01f, 0.01f));
+    // models.push_back(&lego);
 
-    auto pointLights = std::vector{pointLight};
-    auto spotLights = std::vector{spotLight};
-    auto renderer = Renderer(models, directionalLight, pointLights, spotLights);
+    auto pointLights = std::vector<Light>{};
+    pointLights.push_back(std::move(pointLight));
+    auto spotLights = std::vector<Light>{};
+    spotLights.push_back(std::move(spotLight));
+    auto renderer = Renderer(models, std::move(directionalLight), std::move(pointLights), std::move(spotLights));
     Camera& camera = renderer.GetCamera();
     camera.GetTransform().SetPosition(glm::vec3(-4.0f, 2.0f, 0.0f));
     camera.SetForward(glm::vec3(1.0f, 0.0f, 0.0f));

@@ -5,6 +5,7 @@
 #ifndef OPENGLENGINE_SHADER_H
 #define OPENGLENGINE_SHADER_H
 #include <string>
+#include <unordered_map>
 
 #include "Shader.h"
 #include <glm/gtc/matrix_transform.hpp>
@@ -15,8 +16,17 @@
 class Shader
 {
 public:
-    Shader() = default;
+    Shader();
     Shader(const std::string &pathVert, const std::string &pathFrag);
+    ~Shader();
+
+    // Delete copy operations (can't copy OpenGL programs safely)
+    Shader(const Shader&) = delete;
+    Shader& operator=(const Shader&) = delete;
+
+    // Move operations
+    Shader(Shader&& other) noexcept;
+    Shader& operator=(Shader&& other) noexcept;
 
     void Link() const;
     void Use() const;
@@ -27,12 +37,19 @@ public:
     void SetUniformInt(const std::string& name, int value) const;
     void SetLight(const Light &light, const std::string &index = "") const;
     void SetLights(const std::vector<Light>& lights) const;
+
+    unsigned int GetProgram() const { return program; }
+
 private:
-    unsigned int program;
-    uint32_t vertex;
-    uint32_t fragment;
+    unsigned int program = 0;
+    uint32_t vertex = 0;
+    uint32_t fragment = 0;
+
+    // Cache for uniform locations to avoid repeated glGetUniformLocation calls
+    mutable std::unordered_map<std::string, int> uniformLocationCache;
 
     static void Compile(uint32_t Id, const std::string &path, const std::string &content);
+    int GetUniformLocation(const std::string& name) const;
 };
 
 

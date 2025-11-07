@@ -4,7 +4,7 @@
 
 #ifndef OPENGLENGINE_LIGHT_H
 #define OPENGLENGINE_LIGHT_H
-#include "Transformable.h"
+#include "Entity.h"
 
 enum LightType
 {
@@ -13,7 +13,7 @@ enum LightType
     Spot = 2,
 };
 
-class Light : public Transformable
+class Light : public Entity
 {
 public:
     [[nodiscard]]

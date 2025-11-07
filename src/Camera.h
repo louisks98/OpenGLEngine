@@ -4,10 +4,10 @@
 
 #ifndef OPENGLENGINE_CAMERA_H
 #define OPENGLENGINE_CAMERA_H
-#include "Transformable.h"
+#include "Entity.h"
+#include "glm/fwd.hpp"
 
-
-class Camera : public Transformable
+class Camera : public Entity
 {
 public:
     Camera();

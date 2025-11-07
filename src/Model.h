@@ -7,7 +7,7 @@
 
 #include "Material.h"
 #include "Mesh.h"
-#include "Transformable.h"
+#include "Entity.h"
 
 struct TransformMatrix
 {
@@ -17,7 +17,7 @@ struct TransformMatrix
     glm::mat3 normal;
 };
 
-class Model : public Transformable
+class Model : public Entity
 {
 public:
     explicit Model(const Mesh &mesh);

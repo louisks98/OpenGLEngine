@@ -5,11 +5,18 @@
 #include "Texture.h"
 
 #include <iostream>
+#include <utility>
 
 #include "stb_image.h"
 #include "glad/glad.h"
 
+Texture::Texture()
+    : Id(0)
+{
+}
+
 Texture::Texture(const std::string &source)
+    : Id(0)
 {
     SourcePath = source;
     int width, height, nrChannels;
@@ -34,6 +41,42 @@ Texture::Texture(const std::string &source)
     {
         std::cout << "Failed to load texture: " << source << std::endl;
     }
+}
+
+Texture::~Texture()
+{
+    if (Id != 0)
+    {
+        glDeleteTextures(1, &Id);
+        Id = 0;
+    }
+}
+
+Texture::Texture(Texture&& other) noexcept
+    : Id(other.Id),
+      SourcePath(std::move(other.SourcePath))
+{
+    other.Id = 0;
+}
+
+Texture& Texture::operator=(Texture&& other) noexcept
+{
+    if (this != &other)
+    {
+        // Clean up existing resources
+        if (Id != 0)
+        {
+            glDeleteTextures(1, &Id);
+        }
+
+        // Transfer ownership
+        Id = other.Id;
+        SourcePath = std::move(other.SourcePath);
+
+        // Reset other
+        other.Id = 0;
+    }
+    return *this;
 }
 
 void Texture::Bind(unsigned int textureUnit) const
