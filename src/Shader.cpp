@@ -12,7 +12,7 @@
 
 #include <regex>
 #include <utility>
-inline  static std::string ProcessIncludes(const std::string& source, const std::string& directory)
+static std::string ProcessIncludes(const std::string& source, const std::string& directory)
 {
     std::string result = source;
     std::regex includeRegex(R"###(#include\s+"([^"]+)")###");
@@ -23,28 +23,21 @@ inline  static std::string ProcessIncludes(const std::string& source, const std:
         const std::string includePath = directory + "/" + match[1].str();
         const std::string includeContent = ReadFile(includePath);
 
-        // Recursively process includes in the included file
         const std::string processedInclude = ProcessIncludes(includeContent, directory);
 
-        // Replace the #include directive with the file content
         result = result.substr(0, match.position()) + processedInclude + result.substr(match.position() + match.length());
     }
 
     return result;
 }
 
-Shader::Shader()
-    : program(0), vertex(0), fragment(0)
-{
-}
+Shader::Shader(){}
 
-Shader::Shader(const std::string &pathVert, const std::string &pathFrag)
-    : program(0), vertex(0), fragment(0)
+Shader::Shader(const std::string &pathVert, const std::string &pathFrag, const std::string &name): name(name)
 {
     const uint32_t vertId = glCreateShader(GL_VERTEX_SHADER);
     std::string vertContent = ReadFile(pathVert);
 
-    // Get directory from path for resolving includes
     const std::string vertDir = std::filesystem::path(pathVert).parent_path().string();
     vertContent = ProcessIncludes(vertContent, vertDir);
 
@@ -73,51 +66,50 @@ Shader::~Shader()
     }
 }
 
-Shader::Shader(Shader&& other) noexcept
-    : program(other.program),
-      vertex(other.vertex),
-      fragment(other.fragment),
-      uniformLocationCache(std::move(other.uniformLocationCache))
+Shader::Shader(Shader&& other) noexcept:
+program(other.program),
+vertex(other.vertex),
+fragment(other.fragment),
+uniformLocationCache(std::move(other.uniformLocationCache)),
+name(other.name)
 {
     other.program = 0;
     other.vertex = 0;
     other.fragment = 0;
+    other.name = "";
 }
 
 Shader& Shader::operator=(Shader&& other) noexcept
 {
     if (this != &other)
     {
-        // Clean up existing resources
         if (program != 0)
         {
             glDeleteProgram(program);
         }
 
-        // Transfer ownership
         program = other.program;
         vertex = other.vertex;
         fragment = other.fragment;
         uniformLocationCache = std::move(other.uniformLocationCache);
+        name = other.name;
 
-        // Reset other
         other.program = 0;
         other.vertex = 0;
         other.fragment = 0;
+        other.name = "";
     }
     return *this;
 }
 
 int Shader::GetUniformLocation(const std::string& name) const
 {
-    // Check cache first
     auto it = uniformLocationCache.find(name);
     if (it != uniformLocationCache.end())
     {
         return it->second;
     }
 
-    // Not in cache, query OpenGL
     const int location = glGetUniformLocation(program, name.c_str());
     uniformLocationCache[name] = location;
     return location;
@@ -194,35 +186,35 @@ void Shader::SetUniformInt(const std::string &name, const int value) const
     glUniform1i(location, value);
 }
 
-void Shader::SetLight(const Light &light, const std::string &index) const
+void Shader::SetLight(const Light* light, const std::string &index) const
 {
-    switch (light.GetType())
+    switch (light->GetType())
     {
        case LightType::Directional:
-            SetUniformVec3("directionalLight.direction", light.GetDirection());
-            SetUniformVec3("directionalLight.color", light.GetColor());
-            SetUniformFloat("directionalLight.intensity", light.GetIntensity());
+            SetUniformVec3("directionalLight.direction", light->GetDirection());
+            SetUniformVec3("directionalLight.color", light->GetColor());
+            SetUniformFloat("directionalLight.intensity", light->GetIntensity());
             break;
         case LightType::Point:
-            SetUniformVec3("pointLights[" + index + "].position", light.GetTransform().GetPosition());
-            SetUniformVec3("pointLights[" + index + "].color", light.GetColor());
-            SetUniformFloat("pointLights[" + index + "].intensity", light.GetIntensity());
+            SetUniformVec3("pointLights[" + index + "].position", light->GetTransform().GetPosition());
+            SetUniformVec3("pointLights[" + index + "].color", light->GetColor());
+            SetUniformFloat("pointLights[" + index + "].intensity", light->GetIntensity());
             SetUniformFloat("pointLights[" + index + "].constant", Light::GetConstant());
-            SetUniformFloat("pointLights[" + index + "].linear", light.GetLinear());
-            SetUniformFloat("pointLights[" + index + "].quadratic", light.GetQuadratic());
+            SetUniformFloat("pointLights[" + index + "].linear", light->GetLinear());
+            SetUniformFloat("pointLights[" + index + "].quadratic", light->GetQuadratic());
             break;
 
         case LightType::Spot:
-            SetUniformVec3("spotLights[" + index + "].position", light.GetTransform().GetPosition());
-            SetUniformVec3("spotLights[" + index + "].spotDirection", light.GetDirection());
-            SetUniformVec3("spotLights[" + index + "].color", light.GetColor());
-            SetUniformFloat("spotLights[" + index + "].intensity", light.GetIntensity());
-            SetUniformFloat("spotLights[" + index + "].cutoff", light.GetCutoff());
+            SetUniformVec3("spotLights[" + index + "].position", light->GetTransform().GetPosition());
+            SetUniformVec3("spotLights[" + index + "].spotDirection", light->GetDirection());
+            SetUniformVec3("spotLights[" + index + "].color", light->GetColor());
+            SetUniformFloat("spotLights[" + index + "].intensity", light->GetIntensity());
+            SetUniformFloat("spotLights[" + index + "].cutoff", light->GetCutoff());
             break;
     };
 }
 
-void Shader::SetLights(const std::vector<Light>& lights) const
+void Shader::SetLights(const std::vector<Light*>& lights) const
 {
     for (size_t i = 0; i < lights.size(); i++)
         SetLight(lights[i], std::to_string(i));

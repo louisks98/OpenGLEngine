@@ -7,6 +7,9 @@
 #include <string>
 #include <memory>
 
+#include "ResourceManager.h"
+#include "Scene.h"
+
 // Forward declarations
 class Entity;
 class Mesh;
@@ -17,26 +20,23 @@ struct aiNode;
 struct aiMesh;
 struct aiMaterial;
 
-struct ShaderPool
-{
-    std::shared_ptr<Shader> phongShader;
-    std::shared_ptr<Shader> phongMapsShader;
 
-    ShaderPool(std::shared_ptr<Shader> phong, std::shared_ptr<Shader> phongMaps)
-        : phongShader(std::move(phong)), phongMapsShader(std::move(phongMaps)) {}
-};
 
 class ModelImporter
 {
 public:
-    static Entity Import(const std::string& path, const ShaderPool& shaders);
-    static Entity Import(const std::string& path);
+    ModelImporter(ResourceManager* resourceManager);
+
+    Entity Import(const std::string& path);
 
 private:
-    static Entity ImportInternal(const std::string& path, const ShaderPool* shaders = nullptr);
+    Entity ImportInternal(const std::string& path);
+
     static Mesh GenerateVertexData(aiMesh* assimpMesh);
-    static Model GenerateModel(aiMaterial* assimpMaterial, Mesh& mesh, const std::string& directory, const ShaderPool* shaders = nullptr);
-    static void GenerateSceneGraph(Entity& entity, const aiScene* scene, const aiNode* assimpNode, const std::string& directory, const ShaderPool* shaders = nullptr);
+    Model GenerateModel(aiMaterial* assimpMaterial, Mesh& mesh, const std::string& directory) const;
+    void GenerateSceneGraph(Entity& entity, const aiScene* scene, const aiNode* assimpNode, const std::string& directory);
+
+    ResourceManager* resourceManager;
 };
 
 

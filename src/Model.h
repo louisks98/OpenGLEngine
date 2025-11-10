@@ -20,17 +20,17 @@ struct TransformMatrix
 class Model : public Entity
 {
 public:
-    explicit Model(const Mesh &mesh);
+    explicit Model(const uint32_t mesh);
+    explicit Model(const uint32_t mesh, const uint32_t material);
 
     [[nodiscard]]
-    Mesh& GetMesh() { return mesh;}
-    void SetMaterial(const Material& mat) {material = mat;};
-    Material& GetMaterial() { return material;}
-    void Render(const TransformMatrix &matrix) const;
+    uint32_t GetMesh() const { return meshId;}
+    void SetMaterial(const uint32_t mat) {materialId = mat;};
+    uint32_t GetMaterial() const { return materialId;}
 
 private:
-    Mesh mesh;
-    Material material;
+    uint32_t meshId;
+    uint32_t materialId;
 };
 
 

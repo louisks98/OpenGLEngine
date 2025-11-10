@@ -6,9 +6,10 @@
 #define OPENGLENGINE_RENDERER_H
 #include <map>
 
-#include "Camera.h"
 #include "Light.h"
 #include "Model.h"
+#include "ResourceManager.h"
+#include "Scene.h"
 
 struct RenderObject
 {
@@ -30,23 +31,22 @@ struct RenderObject
 class Renderer
 {
 public:
-    Renderer(std::vector<Entity*> entities, Light directional, std::vector<Light> pLights, std::vector<Light> spLights);
+    Renderer(Scene* scene, ResourceManager* resourceManager);
     void Initialize();
     void Update(float time);
     void Render();
-    Camera& GetCamera() {return camera;};
-
 private:
-    Camera camera;
-
+    Scene* scene;
+    ResourceManager* resourceManager;
     std::map<Model*, RenderObject> renderObjects;
-    std::vector<Entity *> Entities;
-    Light directionalLight;
-    std::vector<Light> pointLights;
-    std::vector<Light> spotLights;
+    Light* directionalLight;
+    std::vector<Light*> pointLights;
+    std::vector<Light*> spotLights;
 
     glm::mat4 projection;
     glm::mat4 view{};
+
+    void GatherLights();
 };
 
 

@@ -10,13 +10,7 @@
 #include "stb_image.h"
 #include "glad/glad.h"
 
-Texture::Texture()
-    : Id(0)
-{
-}
-
 Texture::Texture(const std::string &source)
-    : Id(0)
 {
     SourcePath = source;
     int width, height, nrChannels;

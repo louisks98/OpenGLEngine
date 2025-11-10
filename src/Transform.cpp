@@ -6,9 +6,11 @@
 
 Transform::Transform()
 {
+    modelMatrix = glm::mat4(1.0f);
     SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
     SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
     SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+    isDirty = false;
 }
 
 glm::vec3 Transform::GetPosition() const
@@ -69,6 +71,8 @@ void Transform::UpdateMatrix()
 
 void Transform::UpdateMatrix(const glm::mat4 &parentMatrix)
 {
-    modelMatrix =  parentMatrix * modelMatrix;
+    glm::mat4 localMatrix = positionMatrix * rotationMatrix * scaleMatrix;
+    modelMatrix = parentMatrix * localMatrix;
+    isDirty = false;
 }
 

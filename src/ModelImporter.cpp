@@ -15,7 +15,10 @@
 #include "Mesh.h"
 #include "Model.h"
 
-Entity ModelImporter::ImportInternal(const std::string& path, const ShaderPool* shaders)
+ModelImporter::ModelImporter(ResourceManager *resourceManager):resourceManager(resourceManager) {}
+
+
+Entity ModelImporter::ImportInternal(const std::string& path)
 {
     auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -49,7 +52,7 @@ Entity ModelImporter::ImportInternal(const std::string& path, const ShaderPool* 
 
 
     Entity rootEntity;
-    GenerateSceneGraph(rootEntity, scene, scene->mRootNode, directory, shaders);
+    GenerateSceneGraph(rootEntity, scene, scene->mRootNode, directory);
 
 
     auto endTime = std::chrono::high_resolution_clock::now();
@@ -59,14 +62,9 @@ Entity ModelImporter::ImportInternal(const std::string& path, const ShaderPool* 
     return rootEntity;
 }
 
-Entity ModelImporter::Import(const std::string& path, const ShaderPool& shaders)
-{
-    return ImportInternal(path, &shaders);
-}
-
 Entity ModelImporter::Import(const std::string& path)
 {
-    return ImportInternal(path, nullptr);
+    return ImportInternal(path);
 }
 
 Mesh ModelImporter::GenerateVertexData(aiMesh* assimpMesh)
@@ -127,9 +125,10 @@ Mesh ModelImporter::GenerateVertexData(aiMesh* assimpMesh)
     return mesh;
 }
 
-Model ModelImporter::GenerateModel(aiMaterial *assimpMaterial, Mesh& mesh, const std::string& directory, const ShaderPool* shaders)
+Model ModelImporter::GenerateModel(aiMaterial *assimpMaterial, Mesh& mesh, const std::string& directory) const
 {
-    Model model(mesh);
+    auto meshId = resourceManager->AddMesh(std::move(mesh));
+    Model model(meshId);
     Material material;
 
     bool hasTextures = false;
@@ -185,30 +184,30 @@ Model ModelImporter::GenerateModel(aiMaterial *assimpMaterial, Mesh& mesh, const
     assimpMaterial->Get(AI_MATKEY_SHININESS, shininess);
     material.SetFloatProperty("material.shininess", shininess);
 
-    if (shaders != nullptr)
+    if (hasTextures)
     {
-        if (hasTextures && shaders->phongMapsShader != nullptr)
-        {
-            material.SetShader(shaders->phongMapsShader);
-            std::cout << "INFO::MODEL_IMPORT: Using textured shader (phong_maps)" << std::endl;
-        }
-        else if (!hasTextures && shaders->phongShader != nullptr)
-        {
-            material.SetShader(shaders->phongShader);
-            std::cout << "INFO::MODEL_IMPORT: Using solid color shader (phong)" << std::endl;
-        }
-        else
-        {
-            std::cout << "WARNING::MODEL_IMPORT: No appropriate shader found in pool" << std::endl;
-        }
+        auto phongMapShaderId = resourceManager->GetShaderIndexByName("phong_maps");
+        material.SetShader(phongMapShaderId);
+        std::cout << "INFO::MODEL_IMPORT: Using textured shader (phong_maps)" << std::endl;
+    }
+    else if (!hasTextures)
+    {
+        auto phongShader = resourceManager->GetShaderIndexByName("phong");
+        material.SetShader(phongShader);
+        std::cout << "INFO::MODEL_IMPORT: Using solid color shader (phong)" << std::endl;
+    }
+    else
+    {
+        std::cout << "WARNING::MODEL_IMPORT: No appropriate shader found in pool" << std::endl;
     }
 
-    model.SetMaterial(material);
+    auto materialId = resourceManager->AddMaterial(std::move(material));
+    model.SetMaterial(materialId);
 
     return model;
 }
 
-void ModelImporter::GenerateSceneGraph(Entity& entity, const aiScene* scene, const aiNode *assimpNode, const std::string &directory, const ShaderPool* shaders)
+void ModelImporter::GenerateSceneGraph(Entity& entity, const aiScene* scene, const aiNode *assimpNode, const std::string &directory)
 {
     std::cout << "INFO::SCENE_GRAPH: Processing node \"" << assimpNode->mName.C_Str()
               << "\" with " << assimpNode->mNumMeshes << " mesh(es) and "
@@ -228,16 +227,16 @@ void ModelImporter::GenerateSceneGraph(Entity& entity, const aiScene* scene, con
             // Check if material index is valid
             if (sceneMesh->mMaterialIndex >= 0 && sceneMesh->mMaterialIndex < scene->mNumMaterials)
             {
-                Model model = GenerateModel(scene->mMaterials[sceneMesh->mMaterialIndex], mesh, directory, shaders);
+                Model model = GenerateModel(scene->mMaterials[sceneMesh->mMaterialIndex], mesh, directory);
                 entity.AddChild(std::make_unique<Model>(std::move(model)));
             }
             else
             {
                 std::cout << "WARNING::SCENE_GRAPH: Mesh \"" << sceneMesh->mName.C_Str()
                           << "\" has invalid material index " << sceneMesh->mMaterialIndex << std::endl;
-                // Create model with default material
-                Model model(mesh);
-                entity.AddChild(std::make_unique<Model>(std::move(model)));
+
+                const auto meshId = resourceManager->AddMesh(std::move(mesh));
+                entity.AddChild(std::make_unique<Model>(Model(meshId)));
             }
         }
     }
@@ -247,7 +246,7 @@ void ModelImporter::GenerateSceneGraph(Entity& entity, const aiScene* scene, con
         aiNode* childNode = assimpNode->mChildren[i];
         auto childEntity = std::make_unique<Entity>();
 
-        GenerateSceneGraph(*childEntity, scene, childNode, directory, shaders);
+        GenerateSceneGraph(*childEntity, scene, childNode, directory);
 
         entity.AddChild(std::move(childEntity));
     }

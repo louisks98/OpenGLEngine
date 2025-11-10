@@ -9,8 +9,8 @@
 
 class Texture {
 public:
-    Texture();
-    Texture(const std::string &source);
+    Texture() = default;
+    explicit Texture(const std::string &source);
     ~Texture();
 
     // Delete copy operations (can't copy OpenGL textures safely)

@@ -61,16 +61,13 @@ RenderObject& RenderObject::operator=(RenderObject&& other) noexcept
     return *this;
 }
 
-Renderer::Renderer(std::vector<Entity*> entities, Light directional, std::vector<Light> pLights, std::vector<Light> spLights) :
-Entities(std::move(entities)),
-directionalLight(std::move(directional)),
-pointLights(std::move(pLights)),
-spotLights(std::move(spLights)),
+Renderer::Renderer(Scene* scene, ResourceManager* resourceManager) :
+scene(scene),
+resourceManager(resourceManager),
 projection(glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f))
 {
     renderObjects = std::map<Model *, RenderObject>();
     view = glm::mat4(1.0f);
-    camera = Camera();
     Initialize();
 }
 
@@ -79,15 +76,16 @@ void Renderer::Initialize()
     glEnable(GL_DEPTH_TEST);
     renderObjects.clear();
 
-    for (auto entity : Entities)
+    const auto models = scene->GetModels();
+    for ( auto model : models)
     {
-        auto model = static_cast<Model *>(entity);
         if (model == nullptr)
             continue;
 
-        Mesh& mesh = model->GetMesh();
-        const auto& vertices = mesh.GetVertices();
-        const auto& indices = mesh.GetIndices();
+        const uint32_t meshId = model->GetMesh();
+        const Mesh* mesh = resourceManager->GetMesh(meshId);
+        const auto& vertices = mesh->GetVertices();
+        const auto& indices = mesh->GetIndices();
 
         uint32_t VAO, VBO, EBO;
         glGenVertexArrays(1, &VAO);
@@ -127,14 +125,43 @@ void Renderer::Initialize()
 
         renderObjects[model] = std::move(renderObject);
     }
+
+    GatherLights();
 }
+
+void Renderer::GatherLights()
+{
+    directionalLight = nullptr;
+    pointLights.clear();
+    spotLights.clear();
+
+    const auto lights = scene->GetLights();
+    for (auto light : lights)
+    {
+        if (light == nullptr)
+            continue;
+
+        switch (light->GetType())
+        {
+            case LightType::Directional:
+                directionalLight = light;
+                break;
+            case LightType::Point:
+                pointLights.push_back(light);
+                break;
+            case LightType::Spot:
+                spotLights.push_back(light);
+                break;
+        }
+    }
+}
+
 
 void Renderer::Update(const float time)
 {
-    view = camera.GetViewMatrix();
-
-    const auto currentPos = pointLights[0].GetTransform().GetPosition();
-    pointLights[0].GetTransform().SetPosition(glm::vec3(glm::cos(time) * 2.5, currentPos.y, glm::sin(time) * 2.5));
+    GatherLights();
+    view = scene->GetCamera().GetViewMatrix();
+    scene->Update(time);
 }
 
 void Renderer::Render()
@@ -144,25 +171,31 @@ void Renderer::Render()
 
     for (const auto& [model, renderObject] : renderObjects)
     {
-        Mesh& mesh = model->GetMesh();
         Transform& transform = model->GetTransform();
         auto modelMatrix = transform.GetMatrix();
         glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));
 
-        model->Render(TransformMatrix{projection, view, modelMatrix, normalMatrix});
-        Shader& shader = model->GetMaterial().GetShader();
+        const uint32_t materialId = model->GetMaterial();
+        const Material* material = resourceManager->GetMaterial(materialId);
+        const Shader* shader = resourceManager->GetShader(material->GetShader());
 
-        shader.SetUniformVec3("viewPos", camera.GetTransform().GetPosition());
-        shader.SetLight(directionalLight);
+        material->Render(shader);
 
-        shader.SetUniformInt("numPointLights", pointLights.size());
+        shader->SetUniformMat4("projection", projection);
+        shader->SetUniformMat4("view", view);
+        shader->SetUniformMat4("model", modelMatrix);
+        shader->SetUniformMat3("normalMat", normalMatrix);
+
+        shader->SetUniformVec3("viewPos", scene->GetCamera().GetTransform().GetPosition());
+        shader->SetLight(directionalLight);
+
+        shader->SetUniformInt("numPointLights", pointLights.size());
         if (!pointLights.empty())
-            shader.SetLights(pointLights);
+            shader->SetLights(pointLights);
 
-        shader.SetUniformInt("numSpotLights", spotLights.size());
+        shader->SetUniformInt("numSpotLights", spotLights.size());
         if (!spotLights.empty())
-            shader.SetLights(spotLights);
-
+            shader->SetLights(spotLights);
 
         glBindVertexArray(renderObject.VAO);
         glDrawElements(GL_TRIANGLES, renderObject.indexCount, GL_UNSIGNED_INT, nullptr);

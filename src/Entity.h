@@ -4,56 +4,40 @@
 
 #ifndef OPENGLENGINE_TRANSFORMABLE_H
 #define OPENGLENGINE_TRANSFORMABLE_H
+
 #include "Transform.h"
 #include <memory>
-#include <list>
-
 
 class Entity {
-    std::list<std::unique_ptr<Entity>> children;
-    Entity* parent = nullptr;
+
 
     public:
     Entity() = default;
     Entity(const Entity&) = delete;
     Entity& operator=(const Entity&) = delete;
-    Entity(Entity&&) = default;
-    Entity& operator=(Entity&&) = default;
+    Entity(Entity&& other) noexcept;
+    Entity& operator=(Entity&& other) noexcept;
     virtual ~Entity() = default;
 
     [[nodiscard]]
     Transform& GetTransform() { return transform;}
-
     [[nodiscard]]
     const Transform& GetTransform() const { return transform;}
 
-    void AddChild(std::unique_ptr<Entity> child)
-    {
-        child->parent = this;
-        children.push_back(std::move(child));
-    }
-
-    void UpdateTransformAndChildren()
-    {
-        if (transform.IsDirty())
-        {
-            if (parent)
-                transform.UpdateMatrix(parent->GetTransform().GetMatrix());
-            else
-                transform.UpdateMatrix();
-
-            for (const auto& child : children)
-                child->UpdateTransformAndChildren();
-
-            return;
-        }
-
-        for (const auto& child : children)
-            child->UpdateTransformAndChildren();
-    }
+    const std::vector<std::unique_ptr<Entity>>& GetChildren() const { return children;}
+    void AddChild(std::unique_ptr<Entity> child);
+    void Update(float deltaTime);
+    void SetUpdateDelegate(const std::function<void(Entity*, float)> &delegate) {updateDelegate = delegate;};
+    void ClearUpdateDelegate() { updateDelegate = nullptr; };
 
 protected:
-    Transform transform;
+    Transform transform = Transform();
+
+private:
+    std::vector<std::unique_ptr<Entity>> children = std::vector<std::unique_ptr<Entity>>();
+    Entity* parent = nullptr;
+
+    std::function<void(Entity*, float)> updateDelegate;
 };
 
 

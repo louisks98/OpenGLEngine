@@ -17,10 +17,9 @@ class Shader
 {
 public:
     Shader();
-    Shader(const std::string &pathVert, const std::string &pathFrag);
+    Shader(const std::string &pathVert, const std::string &pathFrag, const std::string &name);
     ~Shader();
 
-    // Delete copy operations (can't copy OpenGL programs safely)
     Shader(const Shader&) = delete;
     Shader& operator=(const Shader&) = delete;
 
@@ -35,17 +34,18 @@ public:
     void SetUniformVec3(const std::string& name, const glm::vec3 &value) const;
     void SetUniformFloat(const std::string& name, float value) const;
     void SetUniformInt(const std::string& name, int value) const;
-    void SetLight(const Light &light, const std::string &index = "") const;
-    void SetLights(const std::vector<Light>& lights) const;
+    void SetLight(const Light* light, const std::string &index = "") const;
+    void SetLights(const std::vector<Light*>& lights) const;
 
-    unsigned int GetProgram() const { return program; }
+    std::string GetShaderName() const {return name;};
+
 
 private:
     unsigned int program = 0;
     uint32_t vertex = 0;
     uint32_t fragment = 0;
+    std::string name = "";
 
-    // Cache for uniform locations to avoid repeated glGetUniformLocation calls
     mutable std::unordered_map<std::string, int> uniformLocationCache;
 
     static void Compile(uint32_t Id, const std::string &path, const std::string &content);

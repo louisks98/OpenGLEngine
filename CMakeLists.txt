@@ -32,6 +32,11 @@ add_executable(OpenGLEngine main.cpp glad.c
         src/Light.h
         src/ModelImporter.cpp
         src/ModelImporter.h
+        src/Scene.cpp
+        src/Scene.h
+        src/Entity.cpp
+        src/ResourceManager.cpp
+        src/ResourceManager.h
 )
 target_include_directories(OpenGLEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(OpenGLEngine PRIVATE glfw OpenGL::GL assimp::assimp)

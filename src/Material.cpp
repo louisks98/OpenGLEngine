@@ -4,10 +4,7 @@
 
 #include "Material.h"
 
-Material::Material()
-{
-    shader = nullptr;
-}
+Material::Material() : shaderId(-1), materialId(rand()) {}
 
 void Material::SetColorProperty(const std::string &name, const glm::vec3 color)
 {
@@ -40,7 +37,7 @@ void Material::SetTextureProperty(const std::string &name, const std::shared_ptr
     textureProperties[name] = texture;
 }
 
-std::optional<std::shared_ptr<Texture> > Material::GetTextureProperty(const std::string &name) const
+std::optional<std::shared_ptr<Texture>> Material::GetTextureProperty(const std::string &name) const
 {
     if (textureProperties.contains(name))
         return textureProperties.at(name);
@@ -49,7 +46,7 @@ std::optional<std::shared_ptr<Texture> > Material::GetTextureProperty(const std:
 }
 
 
-void Material::Render() const
+void Material::Render(const Shader* shader) const
 {
     if (shader == nullptr)
         return;

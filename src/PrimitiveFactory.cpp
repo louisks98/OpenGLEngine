@@ -10,7 +10,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-Model PrimitiveFactory::CreateCube()
+uint32_t PrimitiveFactory::CreateCube() const
 {
     std::vector<vertex> vertices = {
         // Front face (Normal: 0, 0, 1)
@@ -59,13 +59,11 @@ Model PrimitiveFactory::CreateCube()
         20, 21, 22,     20, 22, 23    // left
     };
 
-    const auto mesh = Mesh(vertices, indices);
-    auto model = Model(mesh);
-
-    return model;
+    auto mesh = Mesh(vertices, indices);
+    return resourceManager->AddMesh(std::move(mesh));
 }
 
-Model PrimitiveFactory::CreateSphere()
+uint32_t PrimitiveFactory::CreateSphere() const
 {
     const float radius = 0.5f;
     const unsigned int segments = 36;  // Longitude divisions
@@ -128,8 +126,6 @@ Model PrimitiveFactory::CreateSphere()
         }
     }
 
-    const auto mesh = Mesh(vertices, indices);
-    auto model = Model(mesh);
-
-    return model;
+    auto mesh = Mesh(vertices, indices);
+    return resourceManager->AddMesh(std::move(mesh));
 }
