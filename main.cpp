@@ -112,9 +112,12 @@ int main() {
     auto specularTexture = make_shared<Texture>(Texture("image/container2_specular.png"));
 
     auto phongShader = Shader("./shader/vertex.glsl", "./shader/phong.glsl", "phong");
+    auto depthBufferDebugShader = Shader("./shader/vertex.glsl", "./shader/DepthBufferDebug.glsl", "DepthBufferDebug");
 
     auto phongMapShaderId = resourceManager.AddShader(std::move(phongMapsShader));
     auto phongShaderId = resourceManager.AddShader(std::move(phongShader));
+    auto depthBufferDebugShaderId = resourceManager.AddShader(std::move(depthBufferDebugShader));
+    resourceManager.depthBufferDebugShaderId = depthBufferDebugShaderId;
 
     auto emeraldMat = Material();
     emeraldMat.SetShader(phongShaderId);
@@ -126,7 +129,7 @@ int main() {
 
     auto sphereMeshId = primitiveFactory.CreateSphere();
     auto sphereModel = make_unique<Model>(Model(sphereMeshId, emeraldMatId));
-    sphereModel.get()->GetTransform().SetPosition(glm::vec3(1.7, 0.5f, -2.5));
+    sphereModel->GetTransform().SetPosition(glm::vec3(1.7, 0.5f, -2.5));
     scene.AddEntity(std::move(sphereModel));
 
     auto redPlasticMat = Material();
@@ -140,7 +143,7 @@ int main() {
 
     auto sphere2MeshId = primitiveFactory.CreateSphere();
     auto sphere2Model = make_unique<Model>(Model(sphere2MeshId, redPlasticMatId));
-    sphere2Model.get()->GetTransform().SetPosition(glm::vec3(-2.3f, 0.5f, 1.7f));
+    sphere2Model->GetTransform().SetPosition(glm::vec3(-2.3f, 0.5f, 1.7f));
     scene.AddEntity(std::move(sphere2Model));
 
     auto plastic = Material();
@@ -153,27 +156,27 @@ int main() {
 
     auto cube1MeshId = primitiveFactory.CreateCube();
     auto cube1Model = make_unique<Model>(Model(cube1MeshId, plasticMatId));
-    cube1Model.get()->GetTransform().SetPosition(glm::vec3(0.0f, 2.0f, 4.0f));
-    cube1Model.get()->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
+    cube1Model->GetTransform().SetPosition(glm::vec3(0.0f, 2.0f, 4.0f));
+    cube1Model->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
     scene.AddEntity(std::move(cube1Model));
 
     auto cube2MeshId = primitiveFactory.CreateCube();
     auto cube2Model = make_unique<Model>(Model(cube2MeshId, plasticMatId));
-    cube2Model.get()->GetTransform().SetPosition(glm::vec3(0.0f, 2.0f, -4.0f));
-    cube2Model.get()->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
+    cube2Model->GetTransform().SetPosition(glm::vec3(0.0f, 2.0f, -4.0f));
+    cube2Model->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
     scene.AddEntity(std::move(cube2Model));
 
     auto cube3MeshId = primitiveFactory.CreateCube();
     auto cube3Model = make_unique<Model>(Model(cube3MeshId, plasticMatId));
-    cube3Model.get()->GetTransform().SetPosition(glm::vec3(4.0f, 2.0f, 0.0f));
-    cube3Model.get()->GetTransform().SetRotation(glm::vec3(0.0f, 90.0f, 0.0f));
-    cube3Model.get()->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
+    cube3Model->GetTransform().SetPosition(glm::vec3(4.0f, 2.0f, 0.0f));
+    cube3Model->GetTransform().SetRotation(glm::vec3(0.0f, 90.0f, 0.0f));
+    cube3Model->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
     scene.AddEntity(std::move(cube3Model));
 
     auto cube4MeshId = primitiveFactory.CreateCube();
     auto cube4Model = make_unique<Model>(Model(cube4MeshId, redPlasticMatId));
-    cube4Model.get()->GetTransform().SetPosition(glm::vec3(0.0f, 4.0f, 0.0f));
-    cube4Model.get()->GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
+    cube4Model->GetTransform().SetPosition(glm::vec3(0.0f, 4.0f, 0.0f));
+    cube4Model->GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
     scene.AddEntity(std::move(cube4Model));
 
     auto container = Material();
@@ -186,8 +189,8 @@ int main() {
 
     auto cube5MeshId = primitiveFactory.CreateCube();
     auto cube5Model = make_unique<Model>(Model(cube5MeshId, containerMatId));
-    cube5Model.get()->GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-    cube5Model.get()->GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
+    cube5Model->GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    cube5Model->GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
     scene.AddEntity(std::move(cube5Model));
 
     auto pointLight_ptr = make_unique<Light>();
@@ -205,29 +208,24 @@ int main() {
     scene.AddEntity(std::move(pointLight_ptr));
 
     auto directionalLight = make_unique<Light>();
-    directionalLight.get()->SetType(LightType::Directional);
-    directionalLight.get()->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
-    directionalLight.get()->SetIntensity(0.5f);
-    directionalLight.get()->setDirection(glm::vec3(0.2f, -1.0f, 0.3f));
+    directionalLight->SetType(LightType::Directional);
+    directionalLight->SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+    directionalLight->SetIntensity(0.5f);
+    directionalLight->setDirection(glm::vec3(0.2f, -1.0f, 0.3f));
     scene.AddEntity(std::move(directionalLight));
 
     auto spotLight = make_unique<Light>();
-    spotLight.get()->SetType(LightType::Spot);
-    spotLight.get()->SetColor(glm::vec3(1.0f, 1.0f, 0.0f));
-    spotLight.get()->setDirection(glm::vec3(0.5f, -1.0f, 0.0f));
-    spotLight.get()->GetTransform().SetPosition(glm::vec3(-0.5f, 3.0f, 0.0f));
-    spotLight.get()->SetCutoff(glm::cos(glm::radians(30.0f)));
+    spotLight->SetType(LightType::Spot);
+    spotLight->SetColor(glm::vec3(1.0f, 1.0f, 0.0f));
+    spotLight->setDirection(glm::vec3(0.5f, -1.0f, 0.0f));
+    spotLight->GetTransform().SetPosition(glm::vec3(-0.5f, 3.0f, 0.0f));
+    spotLight->SetCutoff(glm::cos(glm::radians(30.0f)));
     scene.AddEntity(std::move(spotLight));
 
     auto mitsuba = modelImporter.Import("model/mitsuba/mitsuba-sphere.obj");
     mitsuba.GetTransform().SetPosition(glm::vec3(0.7f, 0.0f, 0.0f));
     mitsuba.GetTransform().SetRotation(glm::vec3(0.0f, -90.0f, 0.0f));
     scene.AddEntity(make_unique<Entity>(std::move(mitsuba)));
-
-    // auto lego = ModelImporter::Import("model//lego_dragon.dae", shaderPool);
-    // lego.GetTransform().SetPosition(glm::vec3(-3.0f, 0.0f, 0.0f));
-    // lego.GetTransform().SetScale(glm::vec3(0.01f, 0.01f, 0.01f));
-    // models.push_back(&lego);
 
     auto renderer = Renderer(&scene, &resourceManager);
     Camera& camera = scene.GetCamera();

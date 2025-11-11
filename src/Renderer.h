@@ -35,6 +35,8 @@ public:
     void Initialize();
     void Update(float time);
     void Render();
+
+    bool USE_DEPTH_BUFFER_DEBUG = false;
 private:
     Scene* scene;
     ResourceManager* resourceManager;

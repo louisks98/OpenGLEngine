@@ -74,6 +74,7 @@ projection(glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f))
 void Renderer::Initialize()
 {
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     renderObjects.clear();
 
     const auto models = scene->GetModels();
@@ -166,7 +167,7 @@ void Renderer::Update(const float time)
 
 void Renderer::Render()
 {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (const auto& [model, renderObject] : renderObjects)
@@ -177,25 +178,38 @@ void Renderer::Render()
 
         const uint32_t materialId = model->GetMaterial();
         const Material* material = resourceManager->GetMaterial(materialId);
-        const Shader* shader = resourceManager->GetShader(material->GetShader());
 
-        material->Render(shader);
+        const Shader* activeShader;
+        if (USE_DEPTH_BUFFER_DEBUG)
+        {
+            activeShader = resourceManager->GetShader(resourceManager->depthBufferDebugShaderId);
+            activeShader->Use();
+        }
+        else
+        {
+            activeShader = resourceManager->GetShader(material->GetShader());
+            material->Render(activeShader);
+        }
 
-        shader->SetUniformMat4("projection", projection);
-        shader->SetUniformMat4("view", view);
-        shader->SetUniformMat4("model", modelMatrix);
-        shader->SetUniformMat3("normalMat", normalMatrix);
+        activeShader->SetUniformMat4("projection", projection);
+        activeShader->SetUniformMat4("view", view);
+        activeShader->SetUniformMat4("model", modelMatrix);
+        activeShader->SetUniformMat3("normalMat", normalMatrix);
 
-        shader->SetUniformVec3("viewPos", scene->GetCamera().GetTransform().GetPosition());
-        shader->SetLight(directionalLight);
+        if (!USE_DEPTH_BUFFER_DEBUG)
+        {
+            activeShader->SetUniformVec3("viewPos", scene->GetCamera().GetTransform().GetPosition());
+            activeShader->SetLight(directionalLight);
 
-        shader->SetUniformInt("numPointLights", pointLights.size());
-        if (!pointLights.empty())
-            shader->SetLights(pointLights);
+            activeShader->SetUniformInt("numPointLights", pointLights.size());
+            if (!pointLights.empty())
+                activeShader->SetLights(pointLights);
 
-        shader->SetUniformInt("numSpotLights", spotLights.size());
-        if (!spotLights.empty())
-            shader->SetLights(spotLights);
+            activeShader->SetUniformInt("numSpotLights", spotLights.size());
+            if (!spotLights.empty())
+                activeShader->SetLights(spotLights);
+        }
+
 
         glBindVertexArray(renderObject.VAO);
         glDrawElements(GL_TRIANGLES, renderObject.indexCount, GL_UNSIGNED_INT, nullptr);

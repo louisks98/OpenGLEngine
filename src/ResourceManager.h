@@ -24,6 +24,8 @@ public:
     uint32_t AddShader(Shader&& shader);
 
     uint32_t GetShaderIndexByName(const std::string &name) const;
+
+    uint32_t depthBufferDebugShaderId = 0;
 private:
     std::unordered_map<uint32_t, Mesh> meshes;
     std::unordered_map<uint32_t, Material> materials;
