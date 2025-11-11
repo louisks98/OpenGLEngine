@@ -174,6 +174,12 @@ void Shader::SetUniformVec3(const std::string &name, const glm::vec3 &value) con
     glUniform3fv(location, 1, glm::value_ptr(value));
 }
 
+void Shader::SetUniformVec4(const std::string &name, const glm::vec4 &value) const
+{
+    const int location = GetUniformLocation(name);
+    glUniform4fv(location, 1, glm::value_ptr(value));
+}
+
 void Shader::SetUniformFloat(const std::string &name, const float value) const
 {
     const int location = GetUniformLocation(name);

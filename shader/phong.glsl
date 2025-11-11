@@ -20,20 +20,28 @@ uniform vec3 viewPos;
 void main()
 {
 
-    vec3 outputColor = CalculatePhongDirectionalLighting(Normal, FragPos, viewPos,
+    vec4 outputColor = CalculatePhongDirectionalLighting(Normal, FragPos, viewPos,
     directionalLight, material.mainColor, material.specular, material.shininess);
 
     for(int i = 0; i < numPointLights; i++)
     {
-        outputColor += CalculatePhongPointLighting(Normal, FragPos, viewPos,
+        vec4 color = CalculatePhongPointLighting(Normal, FragPos, viewPos,
         pointLights[i], material.mainColor, material.specular, material.shininess);
+        outputColor.rgb += color.rgb;
     }
 
     for(int i = 0; i < numSpotLights; i++)
     {
-        outputColor += CalculatePhongSpotLighting(Normal, FragPos, viewPos,
+        vec4 color = CalculatePhongSpotLighting(Normal, FragPos, viewPos,
         spotLights[i], material.mainColor, material.specular, material.shininess);
+        outputColor.rgb += color.rgb;
     }
 
-    FragColor = vec4(outputColor, 1.0);
+    if(material.type == Translucent)
+    {
+        if(outputColor.a < 0.01)
+            discard;
+    }
+
+    FragColor = outputColor;
 }

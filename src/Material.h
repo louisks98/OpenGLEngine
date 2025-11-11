@@ -12,6 +12,13 @@
 #include "Texture.h"
 #include "glm/vec3.hpp"
 
+enum MaterialType
+{
+    Opaque,
+    Translucent,
+};
+
+
 class Material
 {
 public:
@@ -25,12 +32,16 @@ public:
     void SetShader(const uint32_t shdr) { shaderId = shdr;};
 
     [[nodiscard]]
-    std::optional<glm::vec3> GetColorProperty(const std::string &name) const;
-    void SetColorProperty(const std::string &name, glm::vec3 color);
+    std::optional<glm::vec4> GetColorProperty(const std::string &name) const;
+    void SetColorProperty(const std::string &name, glm::vec4 color);
 
     [[nodiscard]]
     std::optional<float> GetFloatProperty(const std::string &name) const;
     void SetFloatProperty(const std::string &name, float value);
+
+    [[nodiscard]]
+    std::optional<int32_t> GetIntProperty(const std::string &name) const;
+    void SetIntProperty(const std::string &name, int32_t value);
 
     [[nodiscard]]
     std::optional<std::shared_ptr<Texture>> GetTextureProperty(const std::string &name) const;
@@ -38,8 +49,9 @@ public:
 
     void Render(const Shader* shader) const;
 private:
-    std::map<std::string, glm::vec3> colorProperties;
+    std::map<std::string, glm::vec4> colorProperties;
     std::map<std::string, float> floatProperties;
+    std::map<std::string, int> intProperties;
     std::map<std::string, std::shared_ptr<Texture>> textureProperties;
 
     uint32_t shaderId;

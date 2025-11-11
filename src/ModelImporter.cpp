@@ -171,13 +171,13 @@ Model ModelImporter::GenerateModel(aiMaterial *assimpMaterial, Mesh& mesh, const
 
     if (!hasTextures)
     {
-        aiColor3D diffuseColor(1.0f, 1.0f, 1.0f);
+        aiColor4D diffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
         assimpMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor);
-        material.SetColorProperty("material.mainColor", glm::vec3(diffuseColor.r, diffuseColor.g, diffuseColor.b));
+        material.SetColorProperty("material.mainColor", glm::vec4(diffuseColor.r, diffuseColor.g, diffuseColor.b, diffuseColor.a));
 
-        aiColor3D specularColor(1.0f, 1.0f, 1.0f);
+        aiColor4D specularColor(1.0f, 1.0f, 1.0f, 1.0f);
         assimpMaterial->Get(AI_MATKEY_COLOR_SPECULAR, specularColor);
-        material.SetColorProperty("material.specular", glm::vec3(specularColor.r, specularColor.g, specularColor.b));
+        material.SetColorProperty("material.specular", glm::vec4(specularColor.r, specularColor.g, specularColor.b, specularColor.a));
     }
 
     float shininess = 32.0f;

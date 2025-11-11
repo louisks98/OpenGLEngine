@@ -41,6 +41,8 @@ private:
     Scene* scene;
     ResourceManager* resourceManager;
     std::map<Model*, RenderObject> renderObjects;
+    std::vector<Model*> opaqueModels;
+    std::vector<Model*> transparentModels;
     Light* directionalLight;
     std::vector<Light*> pointLights;
     std::vector<Light*> spotLights;
@@ -49,6 +51,10 @@ private:
     glm::mat4 view{};
 
     void GatherLights();
+    void GatherOpaqueModels();
+    void GatherTransparentModels();
+
+    void RenderModel(Model* model, const RenderObject& renderObject) const;
 };
 
 

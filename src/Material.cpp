@@ -4,14 +4,17 @@
 
 #include "Material.h"
 
-Material::Material() : shaderId(-1), materialId(rand()) {}
+Material::Material() : shaderId(-1), materialId(rand())
+{
+    SetIntProperty("material.type", MaterialType::Opaque);
+}
 
-void Material::SetColorProperty(const std::string &name, const glm::vec3 color)
+void Material::SetColorProperty(const std::string &name, const glm::vec4 color)
 {
     colorProperties[name] = color;
 }
 
-std::optional<glm::vec3> Material::GetColorProperty(const std::string &name) const
+std::optional<glm::vec4> Material::GetColorProperty(const std::string &name) const
 {
     if (colorProperties.contains(name))
         return colorProperties.at(name);
@@ -22,6 +25,19 @@ std::optional<glm::vec3> Material::GetColorProperty(const std::string &name) con
 void Material::SetFloatProperty(const std::string &name, const float value)
 {
     floatProperties[name] = value;
+}
+
+std::optional<int32_t> Material::GetIntProperty(const std::string &name) const
+{
+    if (intProperties.contains(name))
+        return intProperties.at(name);
+
+    return {};
+}
+
+void Material::SetIntProperty(const std::string &name, const int32_t value)
+{
+    intProperties[name] = value;
 }
 
 std::optional<float> Material::GetFloatProperty(const std::string &name) const
@@ -45,7 +61,6 @@ std::optional<std::shared_ptr<Texture>> Material::GetTextureProperty(const std::
     return {};
 }
 
-
 void Material::Render(const Shader* shader) const
 {
     if (shader == nullptr)
@@ -57,7 +72,10 @@ void Material::Render(const Shader* shader) const
         shader->SetUniformFloat(name, value);
 
     for (const auto &[name, value] : colorProperties)
-        shader->SetUniformVec3(name, value);
+        shader->SetUniformVec4(name, value);
+
+    for (const auto &[name, value] : intProperties)
+        shader->SetUniformInt(name, value);
 
     int textureUnit = 0;
     for (const auto &[name, value] : textureProperties)

@@ -4,6 +4,7 @@
 
 #include "glad/glad.h"
 #include "Renderer.h"
+#include <algorithm>
 #include "Model.h"
 
 #include <utility>
@@ -75,6 +76,7 @@ void Renderer::Initialize()
 {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+
     renderObjects.clear();
 
     const auto models = scene->GetModels();
@@ -128,6 +130,8 @@ void Renderer::Initialize()
     }
 
     GatherLights();
+    GatherOpaqueModels();
+    GatherTransparentModels();
 }
 
 void Renderer::GatherLights()
@@ -157,10 +161,48 @@ void Renderer::GatherLights()
     }
 }
 
+void Renderer::GatherOpaqueModels()
+{
+    opaqueModels.clear();
+    for (const auto& [model, renderObject]: renderObjects)
+    {
+        const uint32_t materialId = model->GetMaterial();
+        const Material* material = resourceManager->GetMaterial(materialId);
+        auto type = material->GetIntProperty("material.type");
+        if (type.has_value() && type.value() == MaterialType::Opaque)
+            opaqueModels.push_back(model);
+    }
+}
+
+void Renderer::GatherTransparentModels()
+{
+    transparentModels.clear();
+    for (const auto& [model, renderObject]: renderObjects)
+    {
+        const uint32_t materialId = model->GetMaterial();
+        const Material* material = resourceManager->GetMaterial(materialId);
+        auto type = material->GetIntProperty("material.type");
+        if (type.has_value() && type.value() == MaterialType::Translucent)
+            transparentModels.push_back(model);
+    }
+
+    auto cameraPos = scene->GetCamera().GetTransform().GetPosition();
+    std::ranges::sort(transparentModels, [cameraPos](Model* modelA, Model* modelB)
+    {
+        const auto modelAPos = modelA->GetTransform().GetPosition();
+        const auto modelBPos = modelB->GetTransform().GetPosition();
+        const auto distanceA = glm::distance(cameraPos, modelAPos);
+        const auto distanceB = glm::distance(cameraPos, modelBPos);
+
+        return distanceA > distanceB;
+    });
+}
 
 void Renderer::Update(const float time)
 {
     GatherLights();
+    GatherOpaqueModels();
+    GatherTransparentModels();
     view = scene->GetCamera().GetViewMatrix();
     scene->Update(time);
 }
@@ -170,48 +212,66 @@ void Renderer::Render()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (const auto& [model, renderObject] : renderObjects)
+    for (const auto& model : opaqueModels)
     {
-        Transform& transform = model->GetTransform();
-        auto modelMatrix = transform.GetMatrix();
-        glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));
-
-        const uint32_t materialId = model->GetMaterial();
-        const Material* material = resourceManager->GetMaterial(materialId);
-
-        const Shader* activeShader;
-        if (USE_DEPTH_BUFFER_DEBUG)
-        {
-            activeShader = resourceManager->GetShader(resourceManager->depthBufferDebugShaderId);
-            activeShader->Use();
-        }
-        else
-        {
-            activeShader = resourceManager->GetShader(material->GetShader());
-            material->Render(activeShader);
-        }
-
-        activeShader->SetUniformMat4("projection", projection);
-        activeShader->SetUniformMat4("view", view);
-        activeShader->SetUniformMat4("model", modelMatrix);
-        activeShader->SetUniformMat3("normalMat", normalMatrix);
-
-        if (!USE_DEPTH_BUFFER_DEBUG)
-        {
-            activeShader->SetUniformVec3("viewPos", scene->GetCamera().GetTransform().GetPosition());
-            activeShader->SetLight(directionalLight);
-
-            activeShader->SetUniformInt("numPointLights", pointLights.size());
-            if (!pointLights.empty())
-                activeShader->SetLights(pointLights);
-
-            activeShader->SetUniformInt("numSpotLights", spotLights.size());
-            if (!spotLights.empty())
-                activeShader->SetLights(spotLights);
-        }
-
-
-        glBindVertexArray(renderObject.VAO);
-        glDrawElements(GL_TRIANGLES, renderObject.indexCount, GL_UNSIGNED_INT, nullptr);
+        auto& renderObject = renderObjects[model];
+        RenderModel(model, renderObject);
     }
+
+    glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (const auto& model : transparentModels)
+    {
+        auto& renderObject = renderObjects[model];
+        RenderModel(model, renderObject);
+    }
+    glDisable(GL_BLEND);
+    glDepthMask(GL_TRUE);
 }
+
+void Renderer::RenderModel(Model *model, const ::RenderObject &renderObject) const
+{
+    Transform& transform = model->GetTransform();
+    auto modelMatrix = transform.GetMatrix();
+    glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(modelMatrix)));
+
+    const uint32_t materialId = model->GetMaterial();
+    const Material* material = resourceManager->GetMaterial(materialId);
+
+    const Shader* activeShader;
+    if (USE_DEPTH_BUFFER_DEBUG)
+    {
+        activeShader = resourceManager->GetShader(resourceManager->depthBufferDebugShaderId);
+        activeShader->Use();
+    }
+    else
+    {
+        activeShader = resourceManager->GetShader(material->GetShader());
+        material->Render(activeShader);
+    }
+
+    activeShader->SetUniformMat4("projection", projection);
+    activeShader->SetUniformMat4("view", view);
+    activeShader->SetUniformMat4("model", modelMatrix);
+    activeShader->SetUniformMat3("normalMat", normalMatrix);
+
+    if (!USE_DEPTH_BUFFER_DEBUG)
+    {
+        activeShader->SetUniformVec3("viewPos", scene->GetCamera().GetTransform().GetPosition());
+        activeShader->SetLight(directionalLight);
+
+        activeShader->SetUniformInt("numPointLights", pointLights.size());
+        if (!pointLights.empty())
+            activeShader->SetLights(pointLights);
+
+        activeShader->SetUniformInt("numSpotLights", spotLights.size());
+        if (!spotLights.empty())
+            activeShader->SetLights(spotLights);
+    }
+
+
+    glBindVertexArray(renderObject.VAO);
+    glDrawElements(GL_TRIANGLES, renderObject.indexCount, GL_UNSIGNED_INT, nullptr);
+}
+

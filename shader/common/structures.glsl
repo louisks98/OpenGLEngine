@@ -1,10 +1,14 @@
 // Common shader structures
 
+const uint Opaque = 0;
+const uint Translucent = 1;
+
 struct Material
 {
-    vec3 mainColor;
-    vec3 specular;
+    vec4 mainColor;
+    vec4 specular;
     float shininess;
+    uint type;
 };
 
 struct MaterialMaps
@@ -12,6 +16,7 @@ struct MaterialMaps
     sampler2D diffuse;
     sampler2D specular;
     float shininess;
+    uint type;
 };
 
 struct DirectionalLight
