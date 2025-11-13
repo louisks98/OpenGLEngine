@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "Camera.h"
+#include "Skybox.h"
 
 class Entity;
 class Light;
@@ -22,6 +23,10 @@ public:
     const std::vector<Light*>& GetLights() { return lights; }
 
     Camera& GetCamera() {return camera;};
+
+    void SetSkybox(std::unique_ptr<Skybox> skybox) {this->skybox = std::move(skybox);}
+    Skybox* GetSkybox() const {return skybox.get();}
+
     void Update(float deltaTime) const;
 private:
     std::vector<std::unique_ptr<Entity>> entities;
@@ -29,6 +34,7 @@ private:
     std::vector<Light*> lights;
 
     Camera camera = Camera();
+    std::unique_ptr<Skybox> skybox;
 
     void RegisterEntityRecursive(Entity* entity);
     void TryAddModel(Entity* model);

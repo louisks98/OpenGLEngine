@@ -75,7 +75,8 @@ projection(glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f))
 void Renderer::Initialize()
 {
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_CULL_FACE);
 
     renderObjects.clear();
 
@@ -216,6 +217,11 @@ void Renderer::Render()
     {
         auto& renderObject = renderObjects[model];
         RenderModel(model, renderObject);
+    }
+
+    if (scene->GetSkybox() != nullptr)
+    {
+        scene->GetSkybox()->Render(projection, view);
     }
 
     glDepthMask(GL_FALSE);

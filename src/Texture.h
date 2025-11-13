@@ -6,18 +6,21 @@
 #define OPENGLENGINE_TEXTURE_H
 #include <string>
 
+enum TextureType
+{
+    Simple,
+    Cubemap,
+};
 
 class Texture {
 public:
     Texture() = default;
-    explicit Texture(const std::string &source);
+    explicit Texture(TextureType type, const std::string &source);
     ~Texture();
 
-    // Delete copy operations (can't copy OpenGL textures safely)
     Texture(const Texture&) = delete;
     Texture& operator=(const Texture&) = delete;
 
-    // Move operations
     Texture(Texture&& other) noexcept;
     Texture& operator=(Texture&& other) noexcept;
 
@@ -27,6 +30,10 @@ public:
 private:
     unsigned int Id = 0;
     std::string SourcePath;
+    TextureType type;
+
+    void LoadTexture(const std::string &source);
+    void LoadCubemapTexture(const std::string &directory);
 };
 
 

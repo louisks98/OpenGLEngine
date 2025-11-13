@@ -140,7 +140,7 @@ Model ModelImporter::GenerateModel(aiMaterial *assimpMaterial, Mesh& mesh, const
             std::filesystem::path fullPath = std::filesystem::path(directory) / texturePath.C_Str();
             try
             {
-                auto diffuseTexture = std::make_shared<Texture>(fullPath.string());
+                auto diffuseTexture = std::make_shared<Texture>(TextureType::Simple, fullPath.string());
                 material.SetTextureProperty("material.diffuse", diffuseTexture);
                 hasTextures = true;
             }
@@ -159,7 +159,7 @@ Model ModelImporter::GenerateModel(aiMaterial *assimpMaterial, Mesh& mesh, const
             std::filesystem::path fullPath = std::filesystem::path(directory) / texturePath.C_Str();
             try
             {
-                auto specularTexture = std::make_shared<Texture>(fullPath.string());
+                auto specularTexture = std::make_shared<Texture>(TextureType::Simple, fullPath.string());
                 material.SetTextureProperty("material.specular", specularTexture);
             }
             catch (const std::exception& e)

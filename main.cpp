@@ -107,10 +107,13 @@ int main() {
     ModelImporter modelImporter(&resourceManager);
     Scene scene;
 
+    auto skybox = std::make_unique<Skybox>("image/skybox");
+    scene.SetSkybox(std::move(skybox));
+
     auto phongMapsShader = Shader("shader/vertex.glsl", "shader/phong_maps.glsl","phong_maps");
-    auto diffuseTexture = make_shared<Texture>(Texture("image/container2_diffuse.png")) ;
-    auto specularTexture = make_shared<Texture>(Texture("image/container2_specular.png"));
-    auto windowTexture = make_shared<Texture>(Texture("image/window.png"));
+    auto diffuseTexture = make_shared<Texture>(Texture(TextureType::Simple, "image/container2_diffuse.png")) ;
+    auto specularTexture = make_shared<Texture>(Texture(TextureType::Simple, "image/container2_specular.png"));
+    auto windowTexture = make_shared<Texture>(Texture(TextureType::Simple, "image/window.png"));
 
     auto phongShader = Shader("./shader/vertex.glsl", "./shader/phong.glsl", "phong");
     auto depthBufferDebugShader = Shader("./shader/vertex.glsl", "./shader/DepthBufferDebug.glsl", "DepthBufferDebug");
