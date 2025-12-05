@@ -6,9 +6,9 @@
 
 uint32_t ResourceManager::AddMesh(Mesh &&mesh)
 {
-    meshId++;
-    meshes.insert({meshId, std::move(mesh)});
-    return meshId;
+    meshIdCounter++;
+    meshes.insert({meshIdCounter, std::move(mesh)});
+    return meshIdCounter;
 }
 
 const Mesh *ResourceManager::GetMesh(const uint32_t id) const
@@ -21,9 +21,47 @@ const Mesh *ResourceManager::GetMesh(const uint32_t id) const
 
 uint32_t ResourceManager::AddMaterial(Material &&material)
 {
-    materialId++;
-    materials.insert({materialId, std::move(material)});
-    return materialId;
+    materialIdCounter++;
+    materials.insert({materialIdCounter, std::move(material)});
+    return materialIdCounter;
+}
+
+uint32_t ResourceManager::AddMaterial(const uint32_t shaderId, const glm::vec4 mainColor, const glm::vec4 specular, const float shininess)
+{
+    auto mat = Material();
+    mat.SetShader(shaderId);
+    mat.SetColorProperty("material.mainColor", mainColor);
+    mat.SetColorProperty("material.specular", glm::vec4(0.633f, 0.727811f, 0.633f, 0.2f));
+    mat.SetFloatProperty("material.shininess", 76.8f);
+    const auto matId = AddMaterial(std::move(mat));
+    return matId;
+}
+
+uint32_t ResourceManager::AddTranslucentMaterial(const uint32_t shaderId, const glm::vec4 mainColor, const glm::vec4 specular, const float shininess)
+{
+    const auto matId = AddMaterial(shaderId, mainColor, specular, shininess);
+    const auto mat = &materials[matId];
+    mat->SetIntProperty("material.type", MaterialType::Translucent);
+    return matId;
+}
+
+uint32_t ResourceManager::AddTextureMaterial(const uint32_t shaderId, const std::shared_ptr<Texture> &diffuse, const std::shared_ptr<Texture> &specular, const float shininess)
+{
+    auto mat = Material();
+    mat.SetShader(shaderId);
+    mat.SetTextureProperty("material.diffuse", diffuse);
+    mat.SetTextureProperty("material.specular", specular);
+    mat.SetFloatProperty("material.shininess", shininess);
+    const auto matId = AddMaterial(std::move(mat));
+    return matId;
+}
+
+uint32_t ResourceManager::AddTranslucentTextureMaterial(uint32_t shaderId, const std::shared_ptr<Texture> &diffuse, const std::shared_ptr<Texture> &specular, const float shininess)
+{
+    const auto matId = AddTextureMaterial(shaderId, diffuse, specular, shininess);
+    const auto mat = &materials[matId];
+    mat->SetIntProperty("material.type", MaterialType::Translucent);
+    return matId;
 }
 
 const Material *ResourceManager::GetMaterial(const uint32_t id) const
@@ -36,9 +74,15 @@ const Material *ResourceManager::GetMaterial(const uint32_t id) const
 
 uint32_t ResourceManager::AddShader(Shader &&shader)
 {
-    shaderId++;
-    shaders.insert({shaderId, std::move(shader)});
-    return shaderId;
+    shaderIdCounter++;
+    shaders.insert({shaderIdCounter, std::move(shader)});
+    return shaderIdCounter;
+}
+
+uint32_t ResourceManager::AddShader(const std::string &vertPath, const std::string &fragPath, const std::string &name)
+{
+    auto shader = Shader(vertPath, fragPath, name);
+    return AddShader(std::move(shader));
 }
 
 uint32_t ResourceManager::GetShaderIndexByName(const std::string &name) const

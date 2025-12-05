@@ -31,7 +31,7 @@ static std::string ProcessIncludes(const std::string& source, const std::string&
     return result;
 }
 
-Shader::Shader(){}
+Shader::Shader() = default;
 
 Shader::Shader(const std::string &pathVert, const std::string &pathFrag, const std::string &name): name(name)
 {

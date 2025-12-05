@@ -7,7 +7,6 @@
 #include "src/ModelImporter.h"
 #include "src/PrimitiveFactory.h"
 #include "src/Renderer.h"
-#include "src/Shader.h"
 #include "src/Texture.h"
 
 using namespace std;
@@ -26,55 +25,31 @@ int main() {
     auto skybox = std::make_unique<Skybox>("image/skybox");
     scene.SetSkybox(std::move(skybox));
 
-    auto phongMapsShader = Shader("shader/vertex.glsl", "shader/phong_maps.glsl","phong_maps");
-    auto diffuseTexture = make_shared<Texture>(Texture(TextureType::Simple, "image/container2_diffuse.png")) ;
-    auto specularTexture = make_shared<Texture>(Texture(TextureType::Simple, "image/container2_specular.png"));
-    auto windowTexture = make_shared<Texture>(Texture(TextureType::Simple, "image/window.png"));
+    auto diffuseTexture = make_shared<Texture>(Texture(TextureType::Simple, "./image/container2_diffuse.png")) ;
+    auto specularTexture = make_shared<Texture>(Texture(TextureType::Simple, "./image/container2_specular.png"));
+    auto windowTexture = make_shared<Texture>(Texture(TextureType::Simple, "./image/window.png"));
 
-    auto phongShader = Shader("./shader/vertex.glsl", "./shader/phong.glsl", "phong");
-    auto depthBufferDebugShader = Shader("./shader/vertex.glsl", "./shader/DepthBufferDebug.glsl", "DepthBufferDebug");
-
-    auto phongMapShaderId = resourceManager.AddShader(std::move(phongMapsShader));
-    auto phongShaderId = resourceManager.AddShader(std::move(phongShader));
-    auto depthBufferDebugShaderId = resourceManager.AddShader(std::move(depthBufferDebugShader));
+    auto phongMapShaderId = resourceManager.AddShader("./shader/vertex.glsl", "./shader/phong_maps.glsl","phong_maps");
+    auto phongShaderId = resourceManager.AddShader("./shader/vertex.glsl", "./shader/phong.glsl", "phong");
+    auto depthBufferDebugShaderId = resourceManager.AddShader("./shader/vertex.glsl", "./shader/DepthBufferDebug.glsl", "DepthBufferDebug");
     resourceManager.depthBufferDebugShaderId = depthBufferDebugShaderId;
 
-    auto emeraldMat = Material();
-    emeraldMat.SetShader(phongShaderId);
-    emeraldMat.SetIntProperty("material.type", MaterialType::Translucent);
-    emeraldMat.SetColorProperty("material.mainColor", glm::vec4(0.07568f,0.61424f,0.07568f, 0.2f));
-    emeraldMat.SetColorProperty("material.specular", glm::vec4(0.633f, 0.727811f, 0.633f, 0.2f));
-    emeraldMat.SetFloatProperty("material.shininess", 76.8f);
 
-    auto emeraldMatId = resourceManager.AddMaterial(std::move(emeraldMat));
+    auto emeraldMatId = resourceManager.AddTranslucentMaterial(phongShaderId, glm::vec4(0.07568f,0.61424f,0.07568f, 0.2f), glm::vec4(0.633f, 0.727811f, 0.633f, 0.2f), 76.8f);
 
     auto sphereMeshId = primitiveFactory.CreateSphere();
     auto sphereModel = make_unique<Model>(Model(sphereMeshId, emeraldMatId));
     sphereModel->GetTransform().SetPosition(glm::vec3(-1, 0.6f, -2.5));
     scene.AddEntity(std::move(sphereModel));
 
-    auto redPlasticMat = Material();
-    redPlasticMat.SetShader(phongShaderId);
-    redPlasticMat.SetIntProperty("material.type", MaterialType::Translucent);
-    redPlasticMat.SetColorProperty("material.mainColor",glm::vec4(0.5f, 0.0f, 0.0f, 0.3f));
-    redPlasticMat.SetColorProperty("material.specular",glm::vec4(0.7f, 0.6f, 0.6f, 0.3f));
-    redPlasticMat.SetFloatProperty("material.shininess", 32.0f);
-
-    auto redPlasticMatId = resourceManager.AddMaterial(std::move(redPlasticMat));
-
+    auto redPlasticMatId = resourceManager.AddTranslucentMaterial(phongShaderId, glm::vec4(0.5f, 0.0f, 0.0f, 0.3f), glm::vec4(0.7f, 0.6f, 0.6f, 0.3f), 32.0f);
 
     auto sphere2MeshId = primitiveFactory.CreateSphere();
     auto sphere2Model = make_unique<Model>(Model(sphere2MeshId, redPlasticMatId));
     sphere2Model->GetTransform().SetPosition(glm::vec3(-2.3f, 0.5f, 1.7f));
     scene.AddEntity(std::move(sphere2Model));
 
-    auto plastic = Material();
-    plastic.SetShader(phongShaderId);
-    plastic.SetColorProperty("material.mainColor",glm::vec4(1.0f,1.0f,1.0f, 1.0f));
-    plastic.SetColorProperty("material.specular",glm::vec4(0.70f,0.70f,0.70f, 1.0f));
-    plastic.SetFloatProperty("material.shininess", 32.0f);
-
-    auto plasticMatId = resourceManager.AddMaterial(std::move(plastic));
+    auto plasticMatId = resourceManager.AddMaterial(phongShaderId, glm::vec4(1.0f,1.0f,1.0f, 1.0f), glm::vec4(0.70f,0.70f,0.70f, 1.0f), 32.0f);
 
     auto cube1MeshId = primitiveFactory.CreateCube();
     auto cube1Model = make_unique<Model>(Model(cube1MeshId, plasticMatId));
@@ -101,13 +76,7 @@ int main() {
     cube4Model->GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
     scene.AddEntity(std::move(cube4Model));
 
-    auto container = Material();
-    container.SetShader(phongMapShaderId);
-    container.SetTextureProperty("material.diffuse", diffuseTexture);
-    container.SetTextureProperty("material.specular", specularTexture);
-    container.SetFloatProperty("material.shininess", 28.0f);
-
-    auto containerMatId = resourceManager.AddMaterial(std::move(container));
+    auto containerMatId = resourceManager.AddTextureMaterial(phongMapShaderId, diffuseTexture, specularTexture, 28.0f);
 
     auto cube5MeshId = primitiveFactory.CreateCube();
     auto cube5Model = make_unique<Model>(Model(cube5MeshId, containerMatId));
@@ -115,14 +84,7 @@ int main() {
     cube5Model->GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
     scene.AddEntity(std::move(cube5Model));
 
-    auto windowMat = Material();
-    windowMat.SetShader(phongMapShaderId);
-    windowMat.SetIntProperty("material.type", MaterialType::Translucent);
-    windowMat.SetTextureProperty("material.diffuse", windowTexture);
-    windowMat.SetTextureProperty("material.specular", windowTexture);
-    plastic.SetFloatProperty("material.shininess", 0.0f);
-
-    auto windowMatId = resourceManager.AddMaterial(std::move(windowMat));
+    auto windowMatId = resourceManager.AddTranslucentTextureMaterial(phongMapShaderId, windowTexture, windowTexture, 0.0f);
 
     auto cubeWindowMeshID = primitiveFactory.CreateCube();
     auto cubeWindowModel = make_unique<Model>(Model(cubeWindowMeshID, windowMatId));
@@ -140,7 +102,7 @@ int main() {
     pointLight->GetTransform().SetPosition(glm::vec3(0.0f, 2.7f, 0.0f));
     pointLight->SetUpdateDelegate([](Entity* self, const float deltaTime) {
         const auto currentPos = self->GetTransform().GetPosition();
-        const float currentTime = glfwGetTime();
+        const double currentTime = glfwGetTime();
         self->GetTransform().SetPosition(glm::vec3(glm::cos(currentTime) * 2.5, currentPos.y, glm::sin(currentTime) * 2.5));
     });
     scene.AddEntity(std::move(pointLight_ptr));
