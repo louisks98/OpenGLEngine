@@ -31,8 +31,8 @@ uint32_t ResourceManager::AddMaterial(const uint32_t shaderId, const glm::vec4 m
     auto mat = Material();
     mat.SetShader(shaderId);
     mat.SetColorProperty("material.mainColor", mainColor);
-    mat.SetColorProperty("material.specular", glm::vec4(0.633f, 0.727811f, 0.633f, 0.2f));
-    mat.SetFloatProperty("material.shininess", 76.8f);
+    mat.SetColorProperty("material.specular", specular);
+    mat.SetFloatProperty("material.shininess", shininess);
     const auto matId = AddMaterial(std::move(mat));
     return matId;
 }

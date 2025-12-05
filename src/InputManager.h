@@ -19,7 +19,13 @@ public:
 private:
     GLFWwindow* window;
 
-    static void CameraMouseCallback(GLFWwindow* window, double xpos, double ypos);
+    double lastX = 400;
+    double lastY = 300;
+    double pitch = 0.0f;
+    double yaw = -90.0f;
+    bool firstMouse = true;
+
+    void CameraMouseCallback(GLFWwindow* window, double xpos, double ypos);
 };
 
 

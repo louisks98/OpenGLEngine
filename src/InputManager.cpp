@@ -40,9 +40,6 @@ void InputManager::ProcessCameraInput(float deltaTime) const
         camera->SetPosition(position -= speed * camera->GetUp());
 }
 
-double lastX = 400, lastY = 300;
-double pitch = 0.0f, yaw = -90.0f;
-bool firstMouse = true;
 void InputManager::CameraMouseCallback(GLFWwindow *window, double xpos, double ypos)
 {
     if (firstMouse)
@@ -52,18 +49,18 @@ void InputManager::CameraMouseCallback(GLFWwindow *window, double xpos, double y
         firstMouse = false;
     }
 
-    double xoffset = xpos - lastX;
-    double yoffset = lastY - ypos;
+    double xOffset = xpos - lastX;
+    double yOffset = lastY - ypos;
 
     lastX = xpos;
     lastY = ypos;
 
     constexpr float sensitivity = 0.1f;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
+    xOffset *= sensitivity;
+    yOffset *= sensitivity;
 
-    yaw   += xoffset;
-    pitch += yoffset;
+    yaw   += xOffset;
+    pitch += yOffset;
 
     if(pitch > 89.0f)
         pitch =  89.0f;
