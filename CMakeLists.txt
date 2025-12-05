@@ -39,6 +39,8 @@ add_executable(OpenGLEngine main.cpp glad.c
         src/ResourceManager.h
         src/Skybox.cpp
         src/Skybox.h
+        src/Window.cpp
+        src/Window.h
 )
 target_include_directories(OpenGLEngine PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(OpenGLEngine PRIVATE glfw OpenGL::GL assimp::assimp)
