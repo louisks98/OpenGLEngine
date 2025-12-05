@@ -6,10 +6,10 @@
 #define OPENGLENGINE_RENDERER_H
 #include <map>
 
-#include "Light.h"
-#include "Model.h"
-#include "ResourceManager.h"
-#include "Scene.h"
+#include "../entity/Light.h"
+#include "../entity/Model.h"
+#include "../scene/ResourceManager.h"
+#include "../scene/Scene.h"
 
 struct RenderObject
 {

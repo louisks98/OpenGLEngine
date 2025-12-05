@@ -5,7 +5,6 @@
 #ifndef OPENGLENGINE_MODELIMPORTER_H
 #define OPENGLENGINE_MODELIMPORTER_H
 #include <string>
-#include <memory>
 
 #include "ResourceManager.h"
 #include "Scene.h"
@@ -19,7 +18,6 @@ struct aiScene;
 struct aiNode;
 struct aiMesh;
 struct aiMaterial;
-
 
 
 class ModelImporter

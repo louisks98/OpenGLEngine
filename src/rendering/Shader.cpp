@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <filesystem>
-#include "HelperFunctions.h"
+#include "../HelperFunctions.h"
 #include "glad/glad.h"
 
 #include <regex>

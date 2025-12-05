@@ -3,7 +3,6 @@
 //
 
 #include "Texture.h"
-
 #include <filesystem>
 #include <iostream>
 #include <utility>

@@ -7,8 +7,8 @@
 #include <memory>
 #include <vector>
 
-#include "Camera.h"
-#include "Skybox.h"
+#include "../entity/Camera.h"
+#include "../rendering/Skybox.h"
 
 class Entity;
 class Light;

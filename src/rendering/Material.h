@@ -8,7 +8,7 @@
 #include <memory>
 #include <optional>
 
-#include "Shader.h"
+#include "../rendering/Shader.h"
 #include "Texture.h"
 #include "glm/vec3.hpp"
 

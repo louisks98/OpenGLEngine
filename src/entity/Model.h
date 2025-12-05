@@ -5,8 +5,7 @@
 #ifndef OPENGLENGINE_MODEL_H
 #define OPENGLENGINE_MODEL_H
 
-#include "Material.h"
-#include "Mesh.h"
+#include "../rendering/Material.h"
 #include "Entity.h"
 
 struct TransformMatrix
@@ -20,8 +19,8 @@ struct TransformMatrix
 class Model : public Entity
 {
 public:
-    explicit Model(const uint32_t mesh);
-    explicit Model(const uint32_t mesh, const uint32_t material);
+    explicit Model(uint32_t mesh);
+    explicit Model(uint32_t mesh, uint32_t material);
 
     [[nodiscard]]
     uint32_t GetMesh() const { return meshId;}

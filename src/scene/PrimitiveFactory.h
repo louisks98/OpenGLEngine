@@ -4,7 +4,6 @@
 
 #ifndef OPENGLENGINE_PRIMITIVEFACTORY_H
 #define OPENGLENGINE_PRIMITIVEFACTORY_H
-#include "Model.h"
 #include "ResourceManager.h"
 
 

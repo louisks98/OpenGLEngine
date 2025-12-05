@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-#include "ResourceManager.h"
+#include "../scene/ResourceManager.h"
 
 
 class Texture;

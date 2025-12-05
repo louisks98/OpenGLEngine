@@ -3,6 +3,7 @@
 //
 
 #include "SceneBuilder.h"
+#include "../entity/Model.h"
 
 SceneBuilder::SceneBuilder(Scene *scene, PrimitiveFactory *primitiveFactory, ModelImporter *modelImporter) : scene(scene), primitiveFactory(primitiveFactory), modelImporter(modelImporter) {}
 

@@ -6,9 +6,9 @@
 #define OPENGLENGINE_RESOURCEMANAGER_H
 #include <cstdint>
 
-#include "Material.h"
-#include "Mesh.h"
-#include "Shader.h"
+#include "../rendering/Material.h"
+#include "../rendering/Mesh.h"
+#include "../rendering/Shader.h"
 
 
 class ResourceManager

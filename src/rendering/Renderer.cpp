@@ -5,7 +5,7 @@
 #include "glad/glad.h"
 #include "Renderer.h"
 #include <algorithm>
-#include "Model.h"
+#include "../entity/Model.h"
 
 #include <utility>
 #include <GLFW/glfw3.h>

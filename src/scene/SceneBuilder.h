@@ -7,7 +7,6 @@
 #include "ModelImporter.h"
 #include "PrimitiveFactory.h"
 
-
 class SceneBuilder
 {
 public:

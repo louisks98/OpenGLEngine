@@ -11,9 +11,9 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "Material.h"
-#include "Mesh.h"
-#include "Model.h"
+#include "../rendering/Material.h"
+#include "../rendering/Mesh.h"
+#include "../entity/Model.h"
 
 ModelImporter::ModelImporter(ResourceManager *resourceManager):resourceManager(resourceManager) {}
 

@@ -4,8 +4,8 @@
 
 #include "Scene.h"
 
-#include "Light.h"
-#include "Model.h"
+#include "../entity/Light.h"
+#include "../entity/Model.h"
 #include <memory>
 
 void Scene::AddEntity(std::unique_ptr<Entity> entity)

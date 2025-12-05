@@ -3,12 +3,12 @@
 #include "src/InputManager.h"
 #include "src/Window.h"
 
-#include "src/Mesh.h"
-#include "src/ModelImporter.h"
-#include "src/PrimitiveFactory.h"
-#include "src/Renderer.h"
-#include "src/SceneBuilder.h"
-#include "src/Texture.h"
+#include "src/rendering/Mesh.h"
+#include "src/scene/ModelImporter.h"
+#include "src/scene/PrimitiveFactory.h"
+#include "src/rendering/Renderer.h"
+#include "src/scene/SceneBuilder.h"
+#include "src/rendering/Texture.h"
 
 using namespace std;
 

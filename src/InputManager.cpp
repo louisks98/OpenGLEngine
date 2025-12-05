@@ -4,7 +4,7 @@
 
 #include "InputManager.h"
 
-#include "Camera.h"
+#include "entity/Camera.h"
 
 InputManager::InputManager(GLFWwindow *window) : window(window){}
 
@@ -40,6 +40,11 @@ void InputManager::ProcessCameraInput(float deltaTime) const
         camera->SetPosition(position -= speed * camera->GetUp());
 }
 
+double lastX = 400;
+double lastY = 300;
+double pitch = 0.0f;
+double yaw = -90.0f;
+bool firstMouse = true;
 void InputManager::CameraMouseCallback(GLFWwindow *window, double xpos, double ypos)
 {
     if (firstMouse)
