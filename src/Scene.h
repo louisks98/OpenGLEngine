@@ -24,7 +24,7 @@ public:
 
     Camera& GetCamera() {return camera;};
 
-    void SetSkybox(std::unique_ptr<Skybox> skybox) {this->skybox = std::move(skybox);}
+    void SetSkybox(std::unique_ptr<Skybox> skyboxPtr) {this->skybox = std::move(skyboxPtr);}
     Skybox* GetSkybox() const {return skybox.get();}
 
     void Update(float deltaTime) const;

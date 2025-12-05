@@ -7,12 +7,13 @@
 #include "src/ModelImporter.h"
 #include "src/PrimitiveFactory.h"
 #include "src/Renderer.h"
+#include "src/SceneBuilder.h"
 #include "src/Texture.h"
 
 using namespace std;
 
 int main() {
-    Window window = Window("OpenGL Engine", 800, 600);
+    Window window("OpenGL Engine", 800, 600);
     window.Initialize();
 
     InputManager inputManager(window.GetWindowContext());
@@ -21,6 +22,7 @@ int main() {
     PrimitiveFactory primitiveFactory(&resourceManager);
     ModelImporter modelImporter(&resourceManager);
     Scene scene;
+    SceneBuilder sceneBuilder(&scene, &primitiveFactory, &modelImporter);
 
     auto skybox = std::make_unique<Skybox>("image/skybox");
     scene.SetSkybox(std::move(skybox));
@@ -36,69 +38,42 @@ int main() {
 
 
     auto emeraldMatId = resourceManager.AddTranslucentMaterial(phongShaderId, glm::vec4(0.07568f,0.61424f,0.07568f, 0.2f), glm::vec4(0.633f, 0.727811f, 0.633f, 0.2f), 76.8f);
-
-    auto sphereMeshId = primitiveFactory.CreateSphere();
-    auto sphereModel = make_unique<Model>(Model(sphereMeshId, emeraldMatId));
-    sphereModel->GetTransform().SetPosition(glm::vec3(-1, 0.6f, -2.5));
-    scene.AddEntity(std::move(sphereModel));
+    Transform tf0;
+    tf0.SetPosition(glm::vec3(-1, 0.6f, -2.5));
+    sceneBuilder.AddSphere(emeraldMatId, tf0);
 
     auto redPlasticMatId = resourceManager.AddTranslucentMaterial(phongShaderId, glm::vec4(0.5f, 0.0f, 0.0f, 0.3f), glm::vec4(0.7f, 0.6f, 0.6f, 0.3f), 32.0f);
-
-    auto sphere2MeshId = primitiveFactory.CreateSphere();
-    auto sphere2Model = make_unique<Model>(Model(sphere2MeshId, redPlasticMatId));
-    sphere2Model->GetTransform().SetPosition(glm::vec3(-2.3f, 0.5f, 1.7f));
-    scene.AddEntity(std::move(sphere2Model));
+    Transform tf1;
+    tf1.SetPosition(glm::vec3(-2.3f, 0.5f, 1.7f));
+    sceneBuilder.AddSphere(redPlasticMatId, tf1);
 
     auto plasticMatId = resourceManager.AddMaterial(phongShaderId, glm::vec4(1.0f,1.0f,1.0f, 1.0f), glm::vec4(0.70f,0.70f,0.70f, 1.0f), 32.0f);
+    Transform tf2(glm::vec3(0.0f, 2.0f, 4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(8.0f, 4.0f, 0.2f));
+    sceneBuilder.AddCube(plasticMatId, tf2);
 
-    auto cube1MeshId = primitiveFactory.CreateCube();
-    auto cube1Model = make_unique<Model>(Model(cube1MeshId, plasticMatId));
-    cube1Model->GetTransform().SetPosition(glm::vec3(0.0f, 2.0f, 4.0f));
-    cube1Model->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
-    scene.AddEntity(std::move(cube1Model));
+    Transform tf3(glm::vec3(0.0f, 2.0f, -4.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(8.0f, 4.0f, 0.2f));
+    sceneBuilder.AddCube(plasticMatId, tf3);
 
-    auto cube2MeshId = primitiveFactory.CreateCube();
-    auto cube2Model = make_unique<Model>(Model(cube2MeshId, plasticMatId));
-    cube2Model->GetTransform().SetPosition(glm::vec3(0.0f, 2.0f, -4.0f));
-    cube2Model->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
-    scene.AddEntity(std::move(cube2Model));
+    Transform tf4(glm::vec3(4.0f, 2.0f, 0.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(8.0f, 4.0f, 0.2f));
+    sceneBuilder.AddCube(plasticMatId, tf4);
 
-    auto cube3MeshId = primitiveFactory.CreateCube();
-    auto cube3Model = make_unique<Model>(Model(cube3MeshId, plasticMatId));
-    cube3Model->GetTransform().SetPosition(glm::vec3(4.0f, 2.0f, 0.0f));
-    cube3Model->GetTransform().SetRotation(glm::vec3(0.0f, 90.0f, 0.0f));
-    cube3Model->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.2f));
-    scene.AddEntity(std::move(cube3Model));
-
-    auto cube4MeshId = primitiveFactory.CreateCube();
-    auto cube4Model = make_unique<Model>(Model(cube4MeshId, redPlasticMatId));
-    cube4Model->GetTransform().SetPosition(glm::vec3(0.0f, 4.0f, 0.0f));
-    cube4Model->GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
-    scene.AddEntity(std::move(cube4Model));
+    Transform tf5(glm::vec3(0.0f, 4.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(8.0f, 0.2f, 8.0f));
+    sceneBuilder.AddCube(plasticMatId, tf5);
 
     auto containerMatId = resourceManager.AddTextureMaterial(phongMapShaderId, diffuseTexture, specularTexture, 28.0f);
-
-    auto cube5MeshId = primitiveFactory.CreateCube();
-    auto cube5Model = make_unique<Model>(Model(cube5MeshId, containerMatId));
-    cube5Model->GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-    cube5Model->GetTransform().SetScale(glm::vec3(8.0f, 0.2f, 8.0f));
-    scene.AddEntity(std::move(cube5Model));
+    Transform tf6(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(8.0f, 0.2f, 8.0f));
+    sceneBuilder.AddCube(containerMatId, tf6);
 
     auto windowMatId = resourceManager.AddTranslucentTextureMaterial(phongMapShaderId, windowTexture, windowTexture, 0.0f);
-
-    auto cubeWindowMeshID = primitiveFactory.CreateCube();
-    auto cubeWindowModel = make_unique<Model>(Model(cubeWindowMeshID, windowMatId));
-    cubeWindowModel->GetTransform().SetPosition(glm::vec3(-4.0f, 2.0f, 0.0f));
-    cubeWindowModel->GetTransform().SetRotation(glm::vec3(0.0f, 90.0f, 0.0f));
-    cubeWindowModel->GetTransform().SetScale(glm::vec3(8.0f, 4.0f, 0.1f));
-    scene.AddEntity(std::move(cubeWindowModel));
+    Transform tf7(glm::vec3(-4.0f, 2.0f, 0.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(8.0f, 4.0f, 0.1f));
+    sceneBuilder.AddCube(windowMatId, tf7);
 
     auto pointLight_ptr = make_unique<Light>();
     auto pointLight = pointLight_ptr.get();
     pointLight->SetType(LightType::Point);
     pointLight->SetLinear(0.22f);
     pointLight->SetQuadratic(0.20f);
-    //pointLight.SetIntensity(0.5);
+    pointLight->SetIntensity(0.5);
     pointLight->GetTransform().SetPosition(glm::vec3(0.0f, 2.7f, 0.0f));
     pointLight->SetUpdateDelegate([](Entity* self, const float deltaTime) {
         const auto currentPos = self->GetTransform().GetPosition();
@@ -122,16 +97,11 @@ int main() {
     spotLight->SetCutoff(glm::cos(glm::radians(30.0f)));
     scene.AddEntity(std::move(spotLight));
 
-    auto suzanne = modelImporter.Import("model/IridescenceSuzanne/glTF/IridescenceSuzanne.gltf");
-    suzanne.GetTransform().SetPosition(glm::vec3(0.0f, 1.5f, 0.0f));
-    suzanne.GetTransform().SetRotation(glm::vec3(0.0f, -90.0f, 0.0f));
-    scene.AddEntity(make_unique<Entity>(std::move(suzanne)));
+    Transform suzanneTf(glm::vec3(0.0f, 1.5f, 0.0f), glm::vec3(0.0f, -90.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    sceneBuilder.AddModel("model/IridescenceSuzanne/glTF/IridescenceSuzanne.gltf", suzanneTf);
 
-    auto duck = modelImporter.Import("model/Duck/glTF/Duck.gltf");
-    duck.GetTransform().SetPosition(glm::vec3(0.5, 0.0f, -2.5));
-    duck.GetTransform().SetRotation(glm::vec3(0.0f, 180.0f, 0.0f));
-    duck.GetTransform().SetScale(glm::vec3(0.01f, 0.01f, 0.01f));
-    scene.AddEntity(make_unique<Entity>(std::move(duck)));
+    Transform duckTf(glm::vec3(0.5, 0.0f, -2.5), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
+    sceneBuilder.AddModel("model/Duck/glTF/Duck.gltf", duckTf);
 
     auto renderer = Renderer(&scene, &resourceManager);
     Camera& camera = scene.GetCamera();

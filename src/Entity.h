@@ -19,6 +19,7 @@ class Entity {
     Entity& operator=(Entity&& other) noexcept;
     virtual ~Entity() = default;
 
+    void SetTransform(const Transform& tf) {transform = tf;};
     [[nodiscard]]
     Transform& GetTransform() { return transform;}
     [[nodiscard]]

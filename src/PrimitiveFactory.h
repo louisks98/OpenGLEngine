@@ -15,10 +15,6 @@ public:
 
     uint32_t CreateCube() const;
     uint32_t CreateSphere() const;
-    static Model CreateCylinder();
-    static Model CreateCone();
-    static Model CreateIcoSphere();
-
 private:
     ResourceManager* resourceManager;
 };

@@ -13,6 +13,16 @@ Transform::Transform()
     isDirty = false;
 }
 
+Transform::Transform(const glm::vec3 position, const glm::vec3 rotation, const glm::vec3 scale)
+{
+    modelMatrix = glm::mat4(1.0f);
+    SetPosition(position);
+    SetRotation(rotation);
+    SetScale(scale);
+    UpdateMatrix();
+    isDirty = false;
+}
+
 glm::vec3 Transform::GetPosition() const
 {
     return position;
