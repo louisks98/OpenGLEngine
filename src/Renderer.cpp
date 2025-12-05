@@ -64,11 +64,12 @@ RenderObject& RenderObject::operator=(RenderObject&& other) noexcept
 
 Renderer::Renderer(Scene* scene, ResourceManager* resourceManager) :
 scene(scene),
-resourceManager(resourceManager),
-projection(glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f))
+resourceManager(resourceManager)
 {
     renderObjects = std::map<Model *, RenderObject>();
     view = glm::mat4(1.0f);
+    const Camera& camera = scene->GetCamera();
+    projection = glm::perspective(glm::radians(camera.GetFov()), camera.GetAspect(), camera.GetNearPlane(), camera.GetFarPlane());
     Initialize();
 }
 
@@ -164,28 +165,12 @@ void Renderer::GatherLights()
 
 void Renderer::GatherOpaqueModels()
 {
-    opaqueModels.clear();
-    for (const auto& [model, renderObject]: renderObjects)
-    {
-        const uint32_t materialId = model->GetMaterial();
-        const Material* material = resourceManager->GetMaterial(materialId);
-        auto type = material->GetIntProperty("material.type");
-        if (type.has_value() && type.value() == MaterialType::Opaque)
-            opaqueModels.push_back(model);
-    }
+    GatherModels(MaterialType::Opaque, &opaqueModels);
 }
 
 void Renderer::GatherTransparentModels()
 {
-    transparentModels.clear();
-    for (const auto& [model, renderObject]: renderObjects)
-    {
-        const uint32_t materialId = model->GetMaterial();
-        const Material* material = resourceManager->GetMaterial(materialId);
-        auto type = material->GetIntProperty("material.type");
-        if (type.has_value() && type.value() == MaterialType::Translucent)
-            transparentModels.push_back(model);
-    }
+    GatherModels(MaterialType::Translucent, &transparentModels);
 
     auto cameraPos = scene->GetCamera().GetTransform().GetPosition();
     std::ranges::sort(transparentModels, [cameraPos](Model* modelA, Model* modelB)
@@ -197,6 +182,19 @@ void Renderer::GatherTransparentModels()
 
         return distanceA > distanceB;
     });
+}
+
+void Renderer::GatherModels(MaterialType materialType, std::vector<Model*>* models)
+{
+    models->clear();
+    for (const auto& [model, renderObject]: renderObjects)
+    {
+        const uint32_t materialId = model->GetMaterial();
+        const Material* material = resourceManager->GetMaterial(materialId);
+        auto type = material->GetIntProperty("material.type");
+        if (type.has_value() && type.value() == materialType)
+            models->push_back(model);
+    }
 }
 
 void Renderer::Update(const float time)

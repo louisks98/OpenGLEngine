@@ -53,6 +53,7 @@ private:
     void GatherLights();
     void GatherOpaqueModels();
     void GatherTransparentModels();
+    void GatherModels(MaterialType type, std::vector<Model*>* models);
 
     void RenderModel(Model* model, const RenderObject& renderObject) const;
 };

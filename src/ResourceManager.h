@@ -35,6 +35,7 @@ private:
     std::unordered_map<uint32_t, Mesh> meshes;
     std::unordered_map<uint32_t, Material> materials;
     std::unordered_map<uint32_t, Shader> shaders;
+    mutable std::unordered_map<std::string, uint32_t> shaderNameCache;
 
     uint32_t meshIdCounter = 0;
     uint32_t materialIdCounter = 0;

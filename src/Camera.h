@@ -21,9 +21,26 @@ public:
     glm::vec3 GetRight() const { return  right; };
     glm::vec3 GetUp() const { return  up; };
 
+    float GetFov() const {return fov;}
+    void SetFov(const float fov) {this->fov = fov;}
+
+    float GetAspect() const {return aspect;}
+    void SetAspect(const float aspect) {this->aspect = aspect;}
+
+    float GetNearPlane() const { return zNear;}
+    void SetNearPlane(const float z_near) {zNear = z_near;}
+
+    float GetFarPlane() const {return zFar;}
+    void SetFarPlane(const float z_far) {zFar = z_far;}
+
     void LockToTarget(const bool value) { lockToTarget = value; };
 
 private:
+    float fov;
+    float aspect;
+    float zNear;
+    float zFar;
+
     glm::vec3 target;
     glm::vec3 up;
     glm::vec3 right;

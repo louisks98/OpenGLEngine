@@ -14,6 +14,10 @@ public:
     void Initialize();
 
     GLFWwindow* GetWindowContext() const;
+
+    int GetWidth() const {return width;}
+    int GetHeight() const {return height;}
+
 private:
     GLFWwindow* window;
     std::string title;

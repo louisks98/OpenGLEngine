@@ -87,13 +87,20 @@ uint32_t ResourceManager::AddShader(const std::string &vertPath, const std::stri
 
 uint32_t ResourceManager::GetShaderIndexByName(const std::string &name) const
 {
+    auto cache = shaderNameCache.find(name);
+    if (cache != shaderNameCache.end())
+        return cache->second;
+
     for (auto it = shaders.begin(); it != shaders.end(); ++it)
     {
         if (it->second.GetShaderName() == name)
+        {
+            shaderNameCache[name] = it->first;
             return it->first;
+        }
     }
 
-    return -1;
+    return INT32_MAX;
 }
 
 const Shader *ResourceManager::GetShader(const uint32_t id) const

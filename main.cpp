@@ -13,7 +13,7 @@
 using namespace std;
 
 int main() {
-    Window window("OpenGL Engine", 800, 600);
+    Window window("OpenGL Engine", 1280, 720);
     window.Initialize();
 
     InputManager inputManager(window.GetWindowContext());
@@ -44,7 +44,7 @@ int main() {
 
     auto redPlasticMatId = resourceManager.AddTranslucentMaterial(phongShaderId, glm::vec4(0.5f, 0.0f, 0.0f, 0.3f), glm::vec4(0.7f, 0.6f, 0.6f, 0.3f), 32.0f);
     Transform tf1;
-    tf1.SetPosition(glm::vec3(-2.3f, 0.5f, 1.7f));
+    tf1.SetPosition(glm::vec3(-2.3f, 0.6f, 1.7f));
     sceneBuilder.AddSphere(redPlasticMatId, tf1);
 
     auto plasticMatId = resourceManager.AddMaterial(phongShaderId, glm::vec4(1.0f,1.0f,1.0f, 1.0f), glm::vec4(0.70f,0.70f,0.70f, 1.0f), 32.0f);
@@ -64,9 +64,11 @@ int main() {
     Transform tf6(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(8.0f, 0.2f, 8.0f));
     sceneBuilder.AddCube(containerMatId, tf6);
 
-    auto windowMatId = resourceManager.AddTranslucentTextureMaterial(phongMapShaderId, windowTexture, windowTexture, 0.0f);
-    Transform tf7(glm::vec3(-4.0f, 2.0f, 0.0f), glm::vec3(0.0f, 90.0f, 0.0f), glm::vec3(8.0f, 4.0f, 0.1f));
-    sceneBuilder.AddCube(windowMatId, tf7);
+    Transform suzanneTf(glm::vec3(0.0f, 1.5f, 0.0f), glm::vec3(0.0f, -90.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    sceneBuilder.AddModel("model/IridescenceSuzanne/glTF/IridescenceSuzanne.gltf", suzanneTf);
+
+    Transform duckTf(glm::vec3(0.5, 0.0f, -2.5), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
+    sceneBuilder.AddModel("model/Duck/glTF/Duck.gltf", duckTf);
 
     auto pointLight_ptr = make_unique<Light>();
     auto pointLight = pointLight_ptr.get();
@@ -97,19 +99,15 @@ int main() {
     spotLight->SetCutoff(glm::cos(glm::radians(30.0f)));
     scene.AddEntity(std::move(spotLight));
 
-    Transform suzanneTf(glm::vec3(0.0f, 1.5f, 0.0f), glm::vec3(0.0f, -90.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-    sceneBuilder.AddModel("model/IridescenceSuzanne/glTF/IridescenceSuzanne.gltf", suzanneTf);
-
-    Transform duckTf(glm::vec3(0.5, 0.0f, -2.5), glm::vec3(0.0f, 180.0f, 0.0f), glm::vec3(0.01f, 0.01f, 0.01f));
-    sceneBuilder.AddModel("model/Duck/glTF/Duck.gltf", duckTf);
-
-    auto renderer = Renderer(&scene, &resourceManager);
     Camera& camera = scene.GetCamera();
     camera.GetTransform().SetPosition(glm::vec3(-4.0f, 2.0f, 0.0f));
     camera.SetForward(glm::vec3(1.0f, 0.0f, 0.0f));
+    float aspect =  static_cast<float>(window.GetWidth()) / window.GetHeight();
+    camera.SetAspect(aspect);
 
     inputManager.SetupCameraAndCursor(&camera);
 
+    auto renderer = Renderer(&scene, &resourceManager);
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
     // render loop
