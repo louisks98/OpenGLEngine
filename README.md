@@ -38,3 +38,6 @@ This engine was built by reading the first few chapters of the [learn opengl](ht
 * Face culling
 * Depth buffer debug shader.
 
+
+![](media/demo.gif)
+
